@@ -1,0 +1,52 @@
+﻿<Page x:Class="FastBackup.CreateBackupPlan"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:fastBackup="clr-namespace:FastBackup"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="CreateBackupPlan">
+    <Grid>
+        <TreeView x:Name="FolderTreeView" ItemsSource="{Binding Entries}" SelectedItemChanged="FolderTreeView_OnSelectedItemChanged" Margin="29,38,0,0" Height="241" VerticalAlignment="Top" HorizontalAlignment="Left" Width="210">
+            <TreeView.ItemContainerStyle>
+                <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource BaseStyle}">
+                    <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                </Style>
+            </TreeView.ItemContainerStyle>
+            <TreeView.ItemTemplate>
+                <HierarchicalDataTemplate ItemsSource="{Binding Directories, UpdateSourceTrigger=PropertyChanged}">
+                    <StackPanel Orientation="Horizontal">
+                        <CheckBox IsChecked="{Binding IsChecked, Mode=TwoWay}"></CheckBox>
+                        <TextBlock VerticalAlignment="Center" Text="{Binding Name}" />
+                    </StackPanel>
+                </HierarchicalDataTemplate>
+            </TreeView.ItemTemplate>
+        </TreeView>
+        <ListView x:Name="Files" ItemsSource="{Binding SelectedFolderChildren}" Margin="244,38,26,0" Height="241" VerticalAlignment="Top" VerticalContentAlignment="Center" SelectionMode="Single">
+            <ListView.View>
+                <GridView>
+                    <GridView.Columns>
+                        <GridViewColumn Header="" Width="30">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <CheckBox IsChecked="{Binding IsChecked, Mode=TwoWay}"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn DisplayMemberBinding="{Binding Name}" Header="Name" Width="150"/>
+                        <GridViewColumn DisplayMemberBinding="{Binding Size}" Header="Size" Width="100"/>
+                        <GridViewColumn DisplayMemberBinding="{Binding Type}" Header="Type" Width="100"/>
+                        <GridViewColumn DisplayMemberBinding="{Binding Modified}" Header="Date Modified" Width="150"/>
+                    </GridView.Columns>
+                </GridView>
+            </ListView.View>
+        </ListView>
+        <Button x:Name="Browse" Content="Browse..." Margin="666,303,0,0" RenderTransformOrigin="1.019,0.539" Command="{Binding BrowseCommand}" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="108"/>
+        <Label x:Name="label" Content="Destination" HorizontalAlignment="Left" Margin="36,305,0,0" VerticalAlignment="Top" Height="30" Width="111"/>
+        <TextBox x:Name="DestinationDirectory" Margin="147,303,0,0" TextWrapping="Wrap" TextAlignment="Left" Text="{Binding SelectedDestinationDirectory, Mode=TwoWay}" VerticalContentAlignment="Center" HorizontalContentAlignment="Left" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="514"/>
+        <Button x:Name="Save" Command="{Binding SaveCommand}" IsEnabled="{Binding IsSaveEnabled}" Content="Save" Margin="538,368,0,0" VerticalAlignment="Top" Height="34" HorizontalAlignment="Left" Width="108"/>
+        <Button x:Name="Cancel" Content="Cancel" Margin="666,368,0,0" Click="Cancel_Click" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="108"/>
+
+    </Grid>
+</Page>
