@@ -5,13 +5,13 @@ namespace FastBackup.Plans
 {
     public class PlanOverviewViewModel : ViewModelBase
     {
-        private PlanRepository _planRepository;
+        private Repository _planRepository;
 
         public ObservableCollection<BackupPlan> Plans { get; set; } = new();
 
         public PlanOverviewViewModel()
         {
-            _planRepository = new PlanRepository();
+            _planRepository = new Repository();
 
             foreach (var plan in _planRepository.GetCollection<BackupPlan>().FindAll())
             {

@@ -8,7 +8,7 @@
       d:DesignHeight="450" d:DesignWidth="800"
       Title="CreateBackupPlan">
     <Grid>
-        <TreeView x:Name="FolderTreeView" ItemsSource="{Binding Entries}" SelectedItemChanged="FolderTreeView_OnSelectedItemChanged" Margin="29,38,0,0" Height="241" VerticalAlignment="Top" HorizontalAlignment="Left" Width="210">
+        <TreeView x:Name="FolderTreeView" ItemsSource="{Binding Drives}" SelectedItemChanged="FolderTreeView_OnSelectedItemChanged" Margin="29,38,0,0" Height="241" VerticalAlignment="Top" HorizontalAlignment="Left" Width="210">
             <TreeView.ItemContainerStyle>
                 <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource BaseStyle}">
                     <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />

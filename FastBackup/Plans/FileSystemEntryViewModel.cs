@@ -1,8 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Windows.Data;
 using FastBackup.Util;
 
 namespace FastBackup.Plans
@@ -13,50 +15,27 @@ namespace FastBackup.Plans
         private bool _isChecked;
         private bool _isExpanded;
 
-        public FileSystemEntryType Type 
-        {
-            get
-            {
-                if (_info is DirectoryInfo)
-                {
-                    return FileSystemEntryType.Folder;
-                }
+        public bool IsFolder => _info is DirectoryInfo;
 
-                if (_info is DriveInfoWrapper)
-                {
-                    return FileSystemEntryType.Drive;
-                }
+        public bool IsDrive => _info is DriveInfoWrapper;
 
-                return FileSystemEntryType.File;
-            }
-        }
+        public bool IsFile => _info is FileInfo;
 
-        public string ImageName => Type == FileSystemEntryType.Drive ? "drive" : (Type == FileSystemEntryType.File ? "file" : (IsExpanded ? "folder-open" : "folder-closed"));
+        public string ImageName => IsDrive ? "drive" : (IsFolder ? (IsExpanded ? "folder-open" : "folder-closed") : "file");
 
         public string Name => _info.Name;
 
         public DateTime Modified => _info.LastWriteTime;
 
-        public long Size
-        {
-            get
-            {
-                if (_info is FileInfo info)
-                {
-                    return info.Length;
-                }
-
-                return 0;
-            }
-        }
+        public long Size => IsFile ? ((FileInfo)_info).Length : 0;
 
         public FileSystemInfo Info => _info;
 
-        public ObservableCollection<FileSystemEntryViewModel?> Children { get; set; } = new();
+        public ObservableCollection<FileSystemEntryViewModel?> Children { get; set; }
 
-        public ObservableCollection<FileSystemEntryViewModel?> Directories { get; set; } = new();
+        public ICollectionView Directories { get; }
 
-        public bool CanExpand => Type != FileSystemEntryType.File;
+        public bool CanExpand => !IsFile;
 
         public bool IsExpanded
         {
@@ -101,35 +80,11 @@ namespace FastBackup.Plans
             _info = info;
             _isChecked = isChecked;
 
-            Children.CollectionChanged += (_, args) =>
-            {
-                switch(args.Action)
-                {
-                    case NotifyCollectionChangedAction.Add:
-                        foreach (var newItem in args.NewItems!)
-                        {
-                            if(newItem is null || ((FileSystemEntryViewModel?)newItem)?.Type == FileSystemEntryType.Folder)
-                            {
-                                Directories.Add(newItem as FileSystemEntryViewModel);
-                            }
-                        }
+            Children = new();
 
-                        break;
-
-                    case NotifyCollectionChangedAction.Remove:
-                        foreach (var oldItem in args.OldItems!)
-                        {
-                            Directories.Remove(oldItem as FileSystemEntryViewModel);
-                        }
-
-                        break;
-
-                    case NotifyCollectionChangedAction.Reset:
-                        Directories.Clear();
-                        break;
-                }
-            };
-                
+            var source = CollectionViewSource.GetDefaultView(Children);
+            source.Filter = p => ((FileSystemEntryViewModel?)p)?.IsFolder ?? true;
+            Directories = source;
 
             // Setup the children as needed
             ClearChildren();
@@ -153,6 +108,8 @@ namespace FastBackup.Plans
                 item.PropertyChanged += (_, _) => OnPropertyChanged(nameof(IsChecked)); 
                 Children.Add(item);
             }
+
+            Directories.Refresh();
         }
 
         private void UpdateChildren(FileSystemEntryViewModel entry)
@@ -171,12 +128,14 @@ namespace FastBackup.Plans
             // Show the expand arrow if we are not a file
             if (CanExpand)
                 Children.Add(null);
+
+            Directories.Refresh();
         }
 
         private void Expand()
         {
             // We cannot expand a file
-            if (!CanExpand)
+            if (!CanExpand || !Children.Any(c => c is null))
                 return;
 
             LoadChildren();

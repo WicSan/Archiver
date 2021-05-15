@@ -14,7 +14,7 @@ namespace FastBackup.Plans
     {
         private string? _selectedDestinationDirectory;
         private FileSystemEntryViewModel? _selectedFolder;
-        private readonly PlanRepository _planRepository;
+        private readonly Repository _planRepository;
         public event EventHandler? OnPlanSaved;
 
         public CreatePlanViewModel()
@@ -23,17 +23,17 @@ namespace FastBackup.Plans
             var drives = DriveInfo.GetDrives().Where(d => d.IsReady);
 
             // Create the view models from the data
-            Entries = new ObservableCollection<FileSystemEntryViewModel>(
+            Drives = new ObservableCollection<FileSystemEntryViewModel>(
                 drives.Select(d => new FileSystemEntryViewModel(new DriveInfoWrapper(d), false)));
 
             BrowseCommand = new RelayCommand(BrowseDirectories);
 
             SaveCommand = new RelayCommand(SavePlan);
 
-            _planRepository = new PlanRepository();
+            _planRepository = new Repository();
         }
 
-        public ObservableCollection<FileSystemEntryViewModel> Entries { get; set; }
+        public ObservableCollection<FileSystemEntryViewModel> Drives { get; set; }
 
         public string? SelectedDestinationDirectory
         {
@@ -95,7 +95,7 @@ namespace FastBackup.Plans
 
         private void SavePlan()
         {
-            var selectedItems = GetSelectedFileSystemEntries(Entries);
+            var selectedItems = GetSelectedFileSystemEntries(Drives);
 
             var plan = new BackupPlan()
             {
