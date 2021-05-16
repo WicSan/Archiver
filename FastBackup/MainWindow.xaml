@@ -3,8 +3,18 @@
                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-                   xmlns:local="clr-namespace:FastBackup"
+                   xmlns:local="clr-namespace:FastBackup.Plans"
                    mc:Ignorable="d"
                    Title="FastBackup" Height="450" Width="800" WindowStyle="SingleBorderWindow">
-    <Frame x:Name="frame" Content="Frame" NavigationUIVisibility="Hidden" Source="/PlanOverview.xaml"/>
+
+    <Window.Resources>
+        <DataTemplate DataType="{x:Type local:PlanOverviewViewModel}">
+            <local:PlanOverview />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type local:CrupdatePlanViewModel}">
+            <local:CrupdateBackupPlan />
+        </DataTemplate>
+    </Window.Resources>
+
+    <ContentControl Content="{Binding CurrentPageViewModel}" />
 </Window>
