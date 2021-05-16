@@ -18,7 +18,7 @@ namespace FastBackup
 
         private void Create_Click(object sender, RoutedEventArgs e)
         {
-            this.NavigationService?.Navigate(new CreateBackupPlan());
+            this.NavigationService?.Navigate(new CrupdateBackupPlan());
         }
     }
 }

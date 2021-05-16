@@ -1,7 +1,5 @@
-﻿using System.IO;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using FastBackup.Plans;
 
 namespace FastBackup
@@ -9,13 +7,13 @@ namespace FastBackup
     /// <summary>
     /// Interaction logic for CreateBackupPlan.xaml
     /// </summary>
-    public partial class CreateBackupPlan : Page
+    public partial class CrupdateBackupPlan : Page
     {
-        public CreateBackupPlan()
+        public CrupdateBackupPlan()
         {
             InitializeComponent();
 
-            var model = new CreatePlanViewModel();
+            var model = new CrupdatePlanViewModel();
             DataContext = model;
 
             model.OnPlanSaved += (_, _) => NavigationService?.GoBack();
@@ -30,7 +28,7 @@ namespace FastBackup
         {
             if (e.NewValue is FileSystemEntryViewModel item)
             {
-                ((CreatePlanViewModel)DataContext).SelectTreeViewItem((FileSystemEntryViewModel)e.NewValue);
+                ((CrupdatePlanViewModel)DataContext).SelectTreeViewItem((FileSystemEntryViewModel)e.NewValue);
             }
         }
     }

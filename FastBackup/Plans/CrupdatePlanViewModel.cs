@@ -10,14 +10,14 @@ using LiteDB;
 
 namespace FastBackup.Plans
 {
-    public class CreatePlanViewModel : ViewModelBase
+    public class CrupdatePlanViewModel : ViewModelBase
     {
         private string? _selectedDestinationDirectory;
         private FileSystemEntryViewModel? _selectedFolder;
         private readonly Repository _planRepository;
         public event EventHandler? OnPlanSaved;
 
-        public CreatePlanViewModel()
+        public CrupdatePlanViewModel()
         {
             // Get the logical drives
             var drives = DriveInfo.GetDrives().Where(d => d.IsReady);
