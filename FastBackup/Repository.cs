@@ -4,7 +4,7 @@ namespace FastBackup.Plans
 {
     public class Repository
     {
-        private static readonly LiteDatabase _db = new LiteDatabase("test.db");
+        private static readonly LiteDatabase _db = new LiteDatabase("backup.db");
 
         public Repository()
         {
