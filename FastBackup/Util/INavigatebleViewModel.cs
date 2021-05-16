@@ -2,8 +2,6 @@
 {
     public interface INavigatebleViewModel
     {
-        void navigateTo(object param);
-
-        void leave();
+        void NavigateTo(object? param);
     }
 }

@@ -10,14 +10,16 @@ using LiteDB;
 
 namespace FastBackup.Plans
 {
-    public class CrupdatePlanViewModel : ViewModelBase
+    public class CrupdatePlanViewModel : ViewModelBase, INavigatebleViewModel
     {
         private string? _selectedDestinationDirectory;
         private FileSystemEntryViewModel? _selectedFolder;
         private readonly Repository _planRepository;
+        private readonly NavigationService _navigationService;
+
         public event EventHandler? OnPlanSaved;
 
-        public CrupdatePlanViewModel()
+        public CrupdatePlanViewModel(NavigationService navigationService)
         {
             // Get the logical drives
             var drives = DriveInfo.GetDrives().Where(d => d.IsReady);
@@ -29,8 +31,10 @@ namespace FastBackup.Plans
             BrowseCommand = new RelayCommand(BrowseDirectories);
 
             SaveCommand = new RelayCommand(SavePlan);
+            CancelCommand = new RelayCommand(Cancel);
 
             _planRepository = new Repository();
+            _navigationService = navigationService;
         }
 
         public ObservableCollection<FileSystemEntryViewModel> Drives { get; set; }
@@ -70,6 +74,8 @@ namespace FastBackup.Plans
 
         public ICommand SaveCommand { get; set; }
 
+        public ICommand CancelCommand { get; set; }
+
         public void SelectTreeViewItem(FileSystemEntryViewModel entry)
         {
             if (entry.Children.Count(i => i is not null) == 0)
@@ -93,6 +99,11 @@ namespace FastBackup.Plans
             }
         }
 
+        private void Cancel()
+        {
+            _navigationService.Navigate(typeof(PlanOverviewViewModel));
+        }
+
         private void SavePlan()
         {
             var selectedItems = GetSelectedFileSystemEntries(Drives);
@@ -108,6 +119,8 @@ namespace FastBackup.Plans
             _planRepository.GetCollection<BackupPlan>().Upsert(plan);
 
             OnPlanSaved?.Invoke(this, EventArgs.Empty);
+
+            _navigationService.Navigate(typeof(PlanOverviewViewModel));
         }
 
         private IEnumerable<FileSystemEntryViewModel> GetSelectedFileSystemEntries(IEnumerable<FileSystemEntryViewModel?> entries)
@@ -127,6 +140,14 @@ namespace FastBackup.Plans
             }
 
             return selectedEntries;
+        }
+
+        public void NavigateTo(object? param)
+        {
+            if(param is not null)
+            {
+                _planRepository.GetCollection<BackupPlan>().Find(p => p.Name == (string)param);
+            }
         }
     }
 }

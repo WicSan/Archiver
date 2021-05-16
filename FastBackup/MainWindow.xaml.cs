@@ -8,9 +8,9 @@ namespace FastBackup
     /// <summary>
     /// Interaction logic for FastBackup.xaml
     /// </summary>
-    public partial class FastBackup : Window
+    public partial class MainWindow : Window
     {
-        public FastBackup()
+        public MainWindow()
         {
             InitializeComponent();
 
@@ -22,6 +22,8 @@ namespace FastBackup
                 info => info.FullName,
                 bson =>
                     bson.AsString.ToFileSystemEntry());
+
+            this.DataContext = new MainViewModel();
         }
     }
 }

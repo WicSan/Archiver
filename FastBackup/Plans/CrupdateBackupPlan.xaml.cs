@@ -1,27 +1,15 @@
 ﻿using System.Windows;
-using System.Windows.Controls;
-using FastBackup.Plans;
 
-namespace FastBackup
+namespace FastBackup.Plans
 {
     /// <summary>
     /// Interaction logic for CreateBackupPlan.xaml
     /// </summary>
-    public partial class CrupdateBackupPlan : Page
+    public partial class CrupdateBackupPlan
     {
         public CrupdateBackupPlan()
         {
             InitializeComponent();
-
-            var model = new CrupdatePlanViewModel();
-            DataContext = model;
-
-            model.OnPlanSaved += (_, _) => NavigationService?.GoBack();
-        }
-
-        private void Cancel_Click(object sender, RoutedEventArgs e)
-        {
-            this.NavigationService?.GoBack();
         }
 
         private void FolderTreeView_OnSelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)

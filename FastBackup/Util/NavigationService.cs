@@ -1,31 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Input;
 
 namespace FastBackup.Util
 {
     public class NavigationService
     {
-        private ICollection<INavigatebleViewModel> ViewModels { get; set; } = new List<INavigatebleViewModel>();
-
-        public List<INavigatebleViewModel> ViewModelList { get; }
-
-        public INavigatebleViewModel CurrentPageViewModel { get; set; }
-
-        public NavigationService()
+        public void Navigate(Type type, object? param = null)
         {
+            CurrentPageViewModel?.Leave();
+            CurrentPageViewModel = ViewModels.First(vm => vm.GetType() == type);
+            ViewModelChanged?.Invoke(this, new EventArgs());
+            CurrentPageViewModel!.NavigateTo(param);
         }
 
-        private void Navigate(Type type)
-        {
-            CurrentPageViewModel = ViewModelList.First(vm => vm.GetType() == type);
-        }
 
-        public event EventHandler? ViewModelChanged
-        {
-            add => CommandManager.RequerySuggested += value;
-            remove => CommandManager.RequerySuggested -= value;
-        }
+        public ICollection<INavigatebleViewModel> ViewModels { get; set; } = new List<INavigatebleViewModel>();
+
+        public INavigatebleViewModel? CurrentPageViewModel { get; private set; }
+
+
+        public event EventHandler? ViewModelChanged;
     }
 }
