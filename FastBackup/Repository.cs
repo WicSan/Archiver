@@ -1,13 +1,15 @@
 ﻿using LiteDB;
+using Microsoft.Extensions.Options;
 
-namespace FastBackup.Plans
+namespace FastBackup
 {
-    public class Repository
+    public class Repository : IRepository
     {
-        private static readonly LiteDatabase _db = new LiteDatabase("backup.db");
+        private readonly LiteDatabase _db;
 
-        public Repository()
+        public Repository(IOptions<LiteDbOptions> options)
         {
+            _db = new LiteDatabase(options.Value.DbName);
         }
 
         public ILiteCollection<T> GetCollection<T>()

@@ -1,22 +1,29 @@
 ﻿using System.Windows;
+using System.Windows.Controls;
 
 namespace FastBackup.Plans
 {
     /// <summary>
     /// Interaction logic for CreateBackupPlan.xaml
     /// </summary>
-    public partial class CrupdateBackupPlan
+    public partial class BackupPlanOverview : UserControl
     {
-        public CrupdateBackupPlan()
+        public BackupPlanOverview()
+        {
+        }
+
+        public BackupPlanOverview(BackupPlanViewModel model)
         {
             InitializeComponent();
+
+            DataContext = model;
         }
 
         private void FolderTreeView_OnSelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
             if (e.NewValue is FileSystemEntryViewModel item)
             {
-                ((CrupdatePlanViewModel)DataContext).SelectTreeViewItem((FileSystemEntryViewModel)e.NewValue);
+                ((BackupPlanViewModel)DataContext).SelectTreeViewItem((FileSystemEntryViewModel)e.NewValue);
             }
         }
     }

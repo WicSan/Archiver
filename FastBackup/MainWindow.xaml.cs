@@ -10,20 +10,11 @@ namespace FastBackup
     /// </summary>
     public partial class MainWindow : Window
     {
-        public MainWindow()
+        public MainWindow(MainViewModel model)
         {
             InitializeComponent();
 
-            BsonMapper.Global.RegisterType(
-                info => info.FullName,
-                bson => new DirectoryInfo(bson));
-
-            BsonMapper.Global.RegisterType(
-                info => info.FullName,
-                bson =>
-                    bson.AsString.ToFileSystemEntry());
-
-            this.DataContext = new MainViewModel();
+            this.DataContext = model;
         }
     }
 }

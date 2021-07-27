@@ -3,23 +3,25 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
 using FastBackup.Util;
 using LiteDB;
+using NodaTime;
 
 namespace FastBackup.Plans
 {
-    public class CrupdatePlanViewModel : ViewModelBase, INavigatebleViewModel
+    public class BackupPlanViewModel : ViewModelBase
     {
         private string? _selectedDestinationDirectory;
         private FileSystemEntryViewModel? _selectedFolder;
-        private readonly Repository _planRepository;
-        private readonly NavigationService _navigationService;
+        private readonly IRepository _planRepository;
+        private BackupPlan _backupPlan = null!;
 
         public event EventHandler? OnPlanSaved;
 
-        public CrupdatePlanViewModel(NavigationService navigationService)
+        public BackupPlanViewModel(IRepository repository)
         {
             // Get the logical drives
             var drives = DriveInfo.GetDrives().Where(d => d.IsReady);
@@ -33,8 +35,65 @@ namespace FastBackup.Plans
             SaveCommand = new RelayCommand(SavePlan);
             CancelCommand = new RelayCommand(Cancel);
 
-            _planRepository = new Repository();
-            _navigationService = navigationService;
+            _planRepository = repository;
+        }
+
+        public BackupPlan BackupPlan
+        {
+            get { return _backupPlan; }
+            set 
+            { 
+                _backupPlan = value;
+
+                foreach(var item in _backupPlan.FileSystemItems)
+                {
+                    DriveInfoWrapper driveInfo;
+                    if(item is DriveInfoWrapper drive)
+                    {
+                        driveInfo = drive;
+                        var viewModel = Drives.First(d => d.Info.FullName == driveInfo.FullName);
+                        viewModel.IsChecked = true;
+                    }
+                    else
+                    {
+                        if(item is DirectoryInfo info)
+                        {
+                            driveInfo = new DriveInfoWrapper(info.DriveInfo());
+                        }
+                        else
+                        {
+                            driveInfo = new DriveInfoWrapper(((FileInfo)item).DriveInfo()!);
+                        }
+
+                        var viewModel = Drives.First(d => d.Info.FullName == driveInfo.FullName);
+                        if (!viewModel.HasChildren)
+                        {
+                            viewModel.LoadChildren();
+                        }
+
+                        for (int i = 0; i < viewModel.Children.Count; i++)
+                        {
+                            var child = viewModel.Children[i];
+                            if(item.FullName.Contains(child!.Info.FullName))
+                            {
+                                if(item.FullName == child.Info.FullName)
+                                {
+                                    child.IsChecked = true;
+                                }
+                                else
+                                {
+                                    if (!child.HasChildren)
+                                    {
+                                        child.LoadChildren();
+                                    }
+                                    viewModel = child;
+                                    i = 0;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         public ObservableCollection<FileSystemEntryViewModel> Drives { get; set; }
@@ -101,17 +160,17 @@ namespace FastBackup.Plans
 
         private void Cancel()
         {
-            _navigationService.Navigate(typeof(PlanOverviewViewModel));
         }
 
         private void SavePlan()
         {
             var selectedItems = GetSelectedFileSystemEntries(Drives);
+            var systemTimeZone = DateTimeZoneProviders.Bcl.GetSystemDefault();
 
             var plan = new BackupPlan()
             {
                 Name = "test",
-                ExecutionStart = DateTime.Now,
+                ExecutionStart = SystemClock.Instance.GetCurrentInstant().InZone(systemTimeZone).TimeOfDay,
                 Destination = new DirectoryInfo(SelectedDestinationDirectory!),
                 FileSystemItems = selectedItems.Select(f => f.Info).ToList(),
             };
@@ -119,8 +178,6 @@ namespace FastBackup.Plans
             _planRepository.GetCollection<BackupPlan>().Upsert(plan);
 
             OnPlanSaved?.Invoke(this, EventArgs.Empty);
-
-            _navigationService.Navigate(typeof(PlanOverviewViewModel));
         }
 
         private IEnumerable<FileSystemEntryViewModel> GetSelectedFileSystemEntries(IEnumerable<FileSystemEntryViewModel?> entries)
@@ -140,14 +197,6 @@ namespace FastBackup.Plans
             }
 
             return selectedEntries;
-        }
-
-        public void NavigateTo(object? param)
-        {
-            if(param is not null)
-            {
-                _planRepository.GetCollection<BackupPlan>().Find(p => p.Name == (string)param);
-            }
         }
     }
 }

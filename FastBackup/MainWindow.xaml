@@ -5,17 +5,25 @@
                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                    xmlns:local="clr-namespace:FastBackup.Plans"
                    mc:Ignorable="d"
-                   Title="FastBackup" Height="450" Width="800" WindowStyle="SingleBorderWindow">
-
+                   Title="FastBackup" Height="450" Width="1019" WindowStyle="SingleBorderWindow">
     <Window.Resources>
-        <DataTemplate DataType="{x:Type local:PlanOverviewViewModel}">
-            <local:PlanOverview />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type local:CrupdatePlanViewModel}">
-            <local:CrupdateBackupPlan />
+        <DataTemplate DataType="{x:Type local:BackupPlanOverview}">
+            <local:BackupPlanOverview />
         </DataTemplate>
     </Window.Resources>
-    <Grid>
-        <ContentControl Content="{Binding CurrentPageViewModel}" />
-    </Grid>
+    <DockPanel>
+        <DockPanel Height="Auto" DockPanel.Dock="Left">
+            <Button Background="White" DockPanel.Dock="Bottom" Height="37">Add new backup</Button>
+            <ListView Height="Auto" x:Name="PlansList" ItemsSource="{Binding Plans}" Width="200">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Name}"></TextBlock>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </DockPanel>
+        <Grid>
+            <ContentControl Content="{Binding PlanView}"></ContentControl>
+        </Grid>
+    </DockPanel>
 </Window>

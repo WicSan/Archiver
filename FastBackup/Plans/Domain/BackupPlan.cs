@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NodaTime;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -8,7 +9,9 @@ namespace FastBackup.Plans
     {
         public string Name { get; set; } = null!;
 
-        public DateTime ExecutionStart { get; set; }
+        public LocalTime ExecutionStart { get; set; }
+
+        public DayOfWeek[] Interval { get; set; } = Array.Empty<DayOfWeek>();
 
         public DirectoryInfo Destination { get; set; } = null!;
 
