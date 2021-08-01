@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace FastBackup.Plans
+namespace FastBackup.Planning.Model
 {
     public class DriveInfoWrapper : FileSystemInfo
     {

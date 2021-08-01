@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
+using FastBackup.Planning.Model;
 using FastBackup.Util;
 using LiteDB;
 using NodaTime;
 
-namespace FastBackup.Plans
+namespace FastBackup.Planning
 {
     public class BackupPlanViewModel : ViewModelBase
     {
@@ -167,7 +167,7 @@ namespace FastBackup.Plans
             var selectedItems = GetSelectedFileSystemEntries(Drives);
             var systemTimeZone = DateTimeZoneProviders.Bcl.GetSystemDefault();
 
-            var plan = new BackupPlan()
+            var plan = new WeeklyBackupPlan()
             {
                 Name = "test",
                 ExecutionStart = SystemClock.Instance.GetCurrentInstant().InZone(systemTimeZone).TimeOfDay,

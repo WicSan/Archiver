@@ -1,4 +1,4 @@
-﻿using FastBackup.Plans;
+﻿using FastBackup.Planning;
 using FastBackup.Util;
 using LiteDB;
 using Microsoft.Extensions.DependencyInjection;

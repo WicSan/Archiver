@@ -1,4 +1,4 @@
-﻿namespace FastBackup.Plans
+﻿namespace FastBackup.Planning
 {
     public enum FileSystemEntryType
     {

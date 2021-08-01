@@ -1,4 +1,5 @@
-﻿using FastBackup.Plans;
+﻿using FastBackup.Planning;
+using FastBackup.Planning.Model;
 using FastBackup.Util;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -19,7 +20,7 @@ namespace FastBackup
             LoadPlans(repository.GetCollection<BackupPlan>().FindAll());
 
             PlanView = view;
-            this._repository = repository;
+            _repository = repository;
             ((BackupPlanViewModel)PlanView.DataContext).BackupPlan = Plans.FirstOrDefault() ?? new BackupPlan();
 
             ((BackupPlanViewModel)PlanView.DataContext).OnPlanSaved += MainViewModel_OnPlanSaved;

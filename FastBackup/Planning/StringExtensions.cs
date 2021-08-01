@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace FastBackup.Plans
+namespace FastBackup.Planning
 {
     public static class StringExtensions
     {

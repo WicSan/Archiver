@@ -5,9 +5,10 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Windows.Data;
+using FastBackup.Planning.Model;
 using FastBackup.Util;
 
-namespace FastBackup.Plans
+namespace FastBackup.Planning
 {
     public class FileSystemEntryViewModel : ViewModelBase
     {

@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 
-namespace FastBackup.Plans
+namespace FastBackup.Planning
 {
     /// <summary>
     /// Interaction logic for CreateBackupPlan.xaml

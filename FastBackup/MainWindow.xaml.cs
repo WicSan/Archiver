@@ -1,6 +1,6 @@
 ﻿using System.IO;
 using System.Windows;
-using FastBackup.Plans;
+using FastBackup.Planning;
 using LiteDB;
 
 namespace FastBackup
