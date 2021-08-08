@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FastBackup\FastBackup.csproj" />
+    <ProjectReference Include="..\FastBackup\Archiver.csproj" />
   </ItemGroup>
 
 </Project>

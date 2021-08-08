@@ -13,7 +13,7 @@ namespace FastBackup.Operation.Model
         public void Backup(BackupPlan plan)
         {
             var timestamp = SystemClock.Instance.GetCurrentInstant().ToString("yyyy-MM-dd-HH-mm-ss", null);
-            using var tarFileStream = new FileStream(Path.Combine(plan.Destination.FullName, $"{plan.Name}_{timestamp}.tar"), FileMode.OpenOrCreate);
+            using var tarFileStream = new FileStream(Path.Combine(plan.Destination.FullName, $"{plan.Name}_{timestamp}.gz.tar"), FileMode.OpenOrCreate);
 
             using var s = new TarOutputStream(tarFileStream, Encoding.UTF8);
 
