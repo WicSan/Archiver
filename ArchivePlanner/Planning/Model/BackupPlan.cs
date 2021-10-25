@@ -1,23 +1,31 @@
-﻿using FastBackup.Operation;
-using FastBackup.Operation.Model;
+﻿using NodaTime;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace FastBackup.Planning.Model
+namespace ArchivePlanner.Planning.Model
 {
-    public class BackupPlan
+    public abstract class BackupPlan
     {
         public string Name { get; set; } = null!;
-
-        public BackupStrategy BackupStrategy { get; set; } = new FullBackupStrategy();
 
         public DirectoryInfo Destination { get; set; } = null!;
 
         public ICollection<FileSystemInfo> FileSystemItems { get; set; } = new List<FileSystemInfo>();
 
-        public void Run()
+        public LocalTime ExecutionStart { get; set; }
+
+        public DayOfWeek[] Interval { get; set; } = Array.Empty<DayOfWeek>();
+
+        public string UniqueName
         {
-            BackupStrategy.Backup(this);
+            get
+            {
+                var timestamp = SystemClock.Instance.GetCurrentInstant().ToString("yyyy-MM-dd-HH-mm-ss", null);
+                return $"{Name}_{timestamp}";
+            }
         }
+
+        public abstract IEnumerable<FileInfo> GetFilesToBackup();
     }
 }

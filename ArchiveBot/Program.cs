@@ -1,7 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace ArchiverBot
+namespace ArchiveBot
 {
     public class Program
     {

@@ -1,5 +1,6 @@
-﻿using FastBackup.Planning;
-using FastBackup.Util;
+﻿using ArchivePlanner;
+using ArchivePlanner.Planning;
+using FastBackup.Planning;
 using LiteDB;
 using Microsoft.Extensions.DependencyInjection;
 using System.IO;
@@ -39,7 +40,7 @@ namespace FastBackup
             services.AddSingleton<BackupPlanViewModel>();
 
             services.Configure<LiteDbOptions>((s) => s.DbName = "backup");
-            services.AddSingleton<IRepository, Repository>();
+            services.AddSingleton<PlanningRepository>();
         }
 
         protected override void OnStartup(StartupEventArgs e)

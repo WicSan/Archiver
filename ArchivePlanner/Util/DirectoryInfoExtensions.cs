@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace FastBackup.Util
+namespace ArchivePlanner.Util
 {
     public static class DirectoryInfoExtensions
     {

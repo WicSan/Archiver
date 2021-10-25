@@ -1,12 +1,12 @@
 using System;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Windows.Data;
-using FastBackup.Planning.Model;
-using FastBackup.Util;
+using ArchivePlanner.Planning;
+using ArchivePlanner.Util;
+using Archiver.Shared;
 
 namespace FastBackup.Planning
 {
@@ -24,11 +24,13 @@ namespace FastBackup.Planning
 
         public string ImageName => IsDrive ? "drive" : (IsFolder ? (IsExpanded ? "folder-open" : "folder-closed") : "file");
 
+        public string Type => IsFolder ? "Folder" : "File";
+
         public string Name => _info.Name;
 
         public DateTime Modified => _info.LastWriteTime;
 
-        public long Size => IsFile ? ((FileInfo)_info).Length : 0;
+        public string Size => IsFolder ? string.Empty : string.Format("{0:N0} KB", ((FileInfo)_info).Length / 1024);
 
         public FileSystemInfo Info => _info;
 

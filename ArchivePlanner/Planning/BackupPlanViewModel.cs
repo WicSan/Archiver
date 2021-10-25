@@ -5,23 +5,25 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using System.Windows.Input;
-using FastBackup.Planning.Model;
-using FastBackup.Util;
+using ArchivePlanner.Planning.Model;
+using ArchivePlanner.Util;
+using Archiver.Shared;
+using FastBackup.Planning;
 using LiteDB;
 using NodaTime;
 
-namespace FastBackup.Planning
+namespace ArchivePlanner.Planning
 {
     public class BackupPlanViewModel : ViewModelBase
     {
         private string? _selectedDestinationDirectory;
         private FileSystemEntryViewModel? _selectedFolder;
-        private readonly IRepository _planRepository;
+        private readonly Repository _planRepository;
         private BackupPlan _backupPlan = null!;
 
         public event EventHandler? OnPlanSaved;
 
-        public BackupPlanViewModel(IRepository repository)
+        public BackupPlanViewModel(PlanningRepository repository)
         {
             // Get the logical drives
             var drives = DriveInfo.GetDrives().Where(d => d.IsReady);
@@ -41,14 +43,14 @@ namespace FastBackup.Planning
         public BackupPlan BackupPlan
         {
             get { return _backupPlan; }
-            set 
-            { 
+            set
+            {
                 _backupPlan = value;
 
-                foreach(var item in _backupPlan.FileSystemItems)
+                foreach (var item in _backupPlan.FileSystemItems)
                 {
                     DriveInfoWrapper driveInfo;
-                    if(item is DriveInfoWrapper drive)
+                    if (item is DriveInfoWrapper drive)
                     {
                         driveInfo = drive;
                         var viewModel = Drives.First(d => d.Info.FullName == driveInfo.FullName);
@@ -56,7 +58,7 @@ namespace FastBackup.Planning
                     }
                     else
                     {
-                        if(item is DirectoryInfo info)
+                        if (item is DirectoryInfo info)
                         {
                             driveInfo = new DriveInfoWrapper(info.DriveInfo());
                         }
@@ -71,12 +73,12 @@ namespace FastBackup.Planning
                             viewModel.LoadChildren();
                         }
 
-                        for (int i = 0; i < viewModel.Children.Count; i++)
+                        for (var i = 0; i < viewModel.Children.Count; i++)
                         {
                             var child = viewModel.Children[i];
-                            if(item.FullName.Contains(child!.Info.FullName))
+                            if (item.FullName.Contains(child!.Info.FullName))
                             {
-                                if(item.FullName == child.Info.FullName)
+                                if (item.FullName == child.Info.FullName)
                                 {
                                     child.IsChecked = true;
                                 }
@@ -124,8 +126,7 @@ namespace FastBackup.Planning
             }
         }
 
-        public ObservableCollection<FileSystemEntryViewModel?> SelectedFolderChildren =>
-            SelectedFolder?.Children ?? new ObservableCollection<FileSystemEntryViewModel?>();
+        public IEnumerable<FileSystemEntryViewModel?> SelectedFolderChildren => SelectedFolder?.Children.ToList() ?? new List<FileSystemEntryViewModel?>();
 
         public bool IsSaveEnabled => SelectedDestinationDirectory is not null;
 
@@ -167,7 +168,7 @@ namespace FastBackup.Planning
             var selectedItems = GetSelectedFileSystemEntries(Drives);
             var systemTimeZone = DateTimeZoneProviders.Bcl.GetSystemDefault();
 
-            var plan = new WeeklyBackupPlan()
+            var plan = new FullBackupPlan()
             {
                 Name = "test",
                 ExecutionStart = SystemClock.Instance.GetCurrentInstant().InZone(systemTimeZone).TimeOfDay,
@@ -175,7 +176,7 @@ namespace FastBackup.Planning
                 FileSystemItems = selectedItems.Select(f => f.Info).ToList(),
             };
 
-            _planRepository.GetCollection<BackupPlan>().Upsert(plan);
+            _planRepository.Upsert(plan);
 
             OnPlanSaved?.Invoke(this, EventArgs.Empty);
         }

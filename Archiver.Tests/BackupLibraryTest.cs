@@ -37,14 +37,11 @@ namespace FastBackup.Tests
         [Fact]
         public void TestCreationTar()
         {
-            using var fileStream = File.Open(@"D:\data\projects\general\FastBackup\FastBackup.Tests\BackupLibraryTest.cs", FileMode.Open);
             using var tarStream = new FileStream(@"../../../target/release.tar", FileMode.OpenOrCreate);
             using var s = new TarOutputStream(tarStream, Encoding.ASCII);
-            var entry = TarEntry.CreateTarEntry(@"\D\data\projects\general\FastBackup\FastBackup.Tests\BackupLibraryTest.cs");
-            entry.Size = fileStream.Length;
-
+            var entry = TarEntry.CreateTarEntry(@"C:\Users\sandr\Documents\My Games\Dawn of War 2\Logfiles\Campaign-trace.txt");
+            entry.Size = 0;
             s.PutNextEntry(entry);
-            fileStream.CopyTo(s);
             s.CloseEntry();
         }
 

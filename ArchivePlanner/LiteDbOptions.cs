@@ -1,4 +1,4 @@
-﻿namespace FastBackup
+﻿namespace ArchivePlanner
 {
     public class LiteDbOptions
     {

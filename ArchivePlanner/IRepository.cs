@@ -1,9 +1,11 @@
-﻿using LiteDB;
+﻿using System.Collections.Generic;
 
-namespace FastBackup
+namespace ArchivePlanner
 {
     public interface IRepository
     {
-        ILiteCollection<T> GetCollection<T>();
+        IEnumerable<T> GetAll<T>();
+
+        void Upsert<T>(T entity);
     }
 }

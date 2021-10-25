@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Windows.Input;
 
-namespace FastBackup.Util
+namespace ArchivePlanner.Util
 {
     public class RelayCommand : ICommand
     {
@@ -11,7 +11,7 @@ namespace FastBackup.Util
 
         public RelayCommand(Action execute, Predicate<object?>? canExecute = null)
         {
-            _execute = execute ?? throw new ArgumentNullException(nameof(execute)); 
+            _execute = execute ?? throw new ArgumentNullException(nameof(execute));
             _canExecute = canExecute;
         }
 

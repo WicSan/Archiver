@@ -1,30 +1,30 @@
-﻿using FastBackup.Operation.Model;
-using FastBackup.Planning.Model;
+﻿using ArchivePlanner.Planning.Model;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Xunit;
 
-namespace FastBackup.Tests
+namespace Archiver.Tests
 {
     public class FullBackupStrategyTest
     {
         [Fact]
         public void WhenStrategyIsExecuted_ItemsAreMoved()
         {
-            var plan = new WeeklyBackupPlan()
+            var plan = new FullBackupPlan()
             {
                 Name = "test",
                 Destination = new DirectoryInfo(Directory.GetCurrentDirectory()),
                 FileSystemItems = new List<FileSystemInfo>
                 {
                     new DirectoryInfo(@"C:\Users\sandr\Documents"),
-                    new DirectoryInfo(@"C:\Users\sandr\Downloads"),
+                    new DirectoryInfo(@"D:\Downloads"),
                 },
             };
 
-            var strategy = new FullBackupStrategy();
-            strategy.Backup(plan);
+            var files = plan.GetFilesToBackup().ToList();
+
+            Assert.NotEmpty(files);
         }
     }
 }

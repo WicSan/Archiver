@@ -6,7 +6,7 @@
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
-        <TreeView x:Name="FolderTreeView" ItemsSource="{Binding Drives}" SelectedItemChanged="FolderTreeView_OnSelectedItemChanged" Margin="29,38,0,0" Height="241" VerticalAlignment="Top" HorizontalAlignment="Left" Width="210">
+        <TreeView x:Name="FolderTreeView" ItemsSource="{Binding Drives}" SelectedItemChanged="FolderTreeView_OnSelectedItemChanged" Margin="29,38,0,171" HorizontalAlignment="Left" Width="210" MinHeight="200">
             <TreeView.ItemContainerStyle>
                 <Style TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource BaseStyle}">
                     <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
@@ -21,7 +21,7 @@
                 </HierarchicalDataTemplate>
             </TreeView.ItemTemplate>
         </TreeView>
-        <ListView x:Name="Files" ItemsSource="{Binding SelectedFolderChildren}" Margin="244,38,26,0" Height="241" VerticalAlignment="Top" VerticalContentAlignment="Center" SelectionMode="Single">
+        <ListView x:Name="Items" ItemsSource="{Binding SelectedFolderChildren}" Margin="244,38,26,171" VerticalContentAlignment="Center" SelectionMode="Single" MinHeight="200" MinWidth="525">
             <ListView.View>
                 <GridView>
                     <GridView.Columns>
@@ -40,11 +40,11 @@
                 </GridView>
             </ListView.View>
         </ListView>
-        <Button x:Name="Browse" Content="Browse..." Margin="666,303,0,0" RenderTransformOrigin="1.019,0.539" Command="{Binding BrowseCommand}" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="108"/>
-        <Label x:Name="label" Content="Destination" HorizontalAlignment="Left" Margin="36,305,0,0" VerticalAlignment="Top" Height="30" Width="111"/>
-        <TextBox x:Name="DestinationDirectory" Margin="147,303,0,0" TextWrapping="Wrap" TextAlignment="Left" Text="{Binding SelectedDestinationDirectory, Mode=TwoWay}" VerticalContentAlignment="Center" HorizontalContentAlignment="Left" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="514"/>
-        <Button x:Name="Save" Command="{Binding SaveCommand}" IsEnabled="{Binding IsSaveEnabled}" Content="Save" Margin="538,368,0,0" VerticalAlignment="Top" Height="34" HorizontalAlignment="Left" Width="108"/>
-        <Button x:Name="Cancel" Content="Cancel" Margin="666,368,0,0" Command="{Binding CancelCommand}" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="108"/>
+        <Button x:Name="Browse" Content="Browse..." Margin="666,0,0,113" RenderTransformOrigin="1.019,0.539" Command="{Binding BrowseCommand}" HorizontalAlignment="Left" Width="108" Height="34" VerticalAlignment="Bottom"/>
+        <Label x:Name="label" Content="Destination" HorizontalAlignment="Left" Margin="36,0,0,115" VerticalAlignment="Bottom" Height="30" Width="111"/>
+        <TextBox x:Name="DestinationDirectory" Margin="147,0,0,113" TextWrapping="Wrap" TextAlignment="Left" Text="{Binding SelectedDestinationDirectory, Mode=TwoWay}" VerticalContentAlignment="Center" HorizontalContentAlignment="Left" HorizontalAlignment="Left" Width="514" Height="34" VerticalAlignment="Bottom"/>
+        <Button x:Name="Save" Command="{Binding SaveCommand}" IsEnabled="{Binding IsSaveEnabled}" Content="Save" Margin="538,0,0,48" HorizontalAlignment="Left" Width="108" Height="34" VerticalAlignment="Bottom"/>
+        <Button x:Name="Cancel" Content="Cancel" Margin="666,0,0,48" Command="{Binding CancelCommand}" HorizontalAlignment="Left" Width="108" Height="34" VerticalAlignment="Bottom"/>
 
     </Grid>
 </UserControl>

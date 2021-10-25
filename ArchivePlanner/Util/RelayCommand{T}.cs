@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 
-namespace FastBackup.Util
+namespace ArchivePlanner.Util
 {
     public class RelayCommand<T> : ICommand
     {

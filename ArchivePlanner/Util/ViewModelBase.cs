@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace FastBackup.Util
+namespace ArchivePlanner.Util
 {
     public abstract class ViewModelBase : INotifyPropertyChanged
     {

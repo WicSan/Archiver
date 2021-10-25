@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace FastBackup.Util
+namespace ArchivePlanner.Util
 {
     public static class EnumerableExtensions
     {
