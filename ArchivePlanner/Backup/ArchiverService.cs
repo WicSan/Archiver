@@ -7,10 +7,13 @@ using SharpCompress.Archives.Tar;
 using SharpCompress.Common;
 using SharpCompress.Readers;
 using SharpCompress.Writers;
+using SharpCompress.Writers.Tar;
 using System;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Net;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -31,10 +34,23 @@ namespace ArchivePlanner.Backup
         {
             var plans = _repository.GetAll<BackupPlan>();
 
+            var certificate = X509Certificate.CreateFromCertFile("ftp.crt");
+            var credentials = new NetworkCredential("sandro", "");
+            var server = new FtpConnection(new Uri("ftp://192.168.1.4"), certificate, credentials);
+
             foreach(var plan in plans)
             {
-                var tar = CreateTarArchive(plan, stoppingToken);
-                CreateGzip(plan, tar);
+                var backupFileName = $"{plan.Name}_{DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss")}.tar";
+
+                
+                using (var uploadStream = server.OpenUploadStream(@$"Backup\sandro\{backupFileName}"))
+                using (var archive = new TarWriter(uploadStream, new TarWriterOptions(CompressionType.None, true)))
+                {
+                    foreach(var file in plan.GetFilesToBackup())
+                    {
+                        archive.AddEntry(file);
+                    }
+                }
             }
 
             return Task.CompletedTask;
