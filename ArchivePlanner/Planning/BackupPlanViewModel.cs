@@ -171,7 +171,6 @@ namespace ArchivePlanner.Planning
             var plan = new FullBackupPlan()
             {
                 Name = "test",
-                ExecutionStart = SystemClock.Instance.GetCurrentInstant().InZone(systemTimeZone).TimeOfDay,
                 Destination = new DirectoryInfo(SelectedDestinationDirectory!),
                 FileSystemItems = selectedItems.Select(f => f.Info).ToList(),
             };

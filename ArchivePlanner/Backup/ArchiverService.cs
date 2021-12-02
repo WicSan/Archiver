@@ -3,15 +3,10 @@ using ArchivePlanner.Planning.Model;
 using ArchivePlanner.Util;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using SharpCompress.Archives.Tar;
+using NodaTime;
 using SharpCompress.Common;
-using SharpCompress.Readers;
-using SharpCompress.Writers;
 using SharpCompress.Writers.Tar;
 using System;
-using System.IO;
-using System.IO.Compression;
-using System.Linq;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
@@ -21,12 +16,15 @@ namespace ArchivePlanner.Backup
 {
     public class ArchiverService : BackgroundService
     {
+        private System.Timers.Timer? _timer;
         private readonly IPlanningRepository _repository;
+        private readonly IClock _clock;
         private readonly ILogger<ArchiverService> _logger;
 
-        public ArchiverService(IPlanningRepository repository, ILogger<ArchiverService> logger)
+        public ArchiverService(IPlanningRepository repository, IClock clock, ILogger<ArchiverService> logger)
         {
             _repository = repository;
+            _clock = clock;
             _logger = logger;
         }
 
@@ -34,100 +32,87 @@ namespace ArchivePlanner.Backup
         {
             var plans = _repository.GetAll<BackupPlan>();
 
-            var certificate = X509Certificate.CreateFromCertFile("ftp.crt");
-            var credentials = new NetworkCredential("sandro", "");
-            var server = new FtpConnection(new Uri("ftp://192.168.1.4"), certificate, credentials);
-
-            foreach(var plan in plans)
+            foreach (var plan in plans)
             {
-                var backupFileName = $"{plan.Name}_{DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss")}.tar";
-
-                
-                using (var uploadStream = server.OpenUploadStream(@$"Backup\sandro\{backupFileName}"))
-                using (var archive = new TarWriter(uploadStream, new TarWriterOptions(CompressionType.None, true)))
-                {
-                    foreach(var file in plan.GetFilesToBackup())
-                    {
-                        archive.AddEntry(file);
-                    }
-                }
+                ScheduleJob(plan, stoppingToken);
             }
 
             return Task.CompletedTask;
         }
 
-        private FileStream CreateTarArchive(BackupPlan plan, CancellationToken cancellationToken)
+        protected void ScheduleJob(BackupPlan plan, CancellationToken cancellationToken)
         {
-            var tarTempFileName = Path.GetTempFileName();
-            using var tarFileStream = new FileStream(tarTempFileName, FileMode.Create);
-
-            var parallelOptions = new ParallelOptions
+            var now = _clock.GetCurrentInstant().ToLocalDateTime();
+            var next = plan.CalculateNextExecution(now);
+            if (next is not null)
             {
-                CancellationToken = cancellationToken,
-                MaxDegreeOfParallelism = 3,
-            };
-            var lockObject = new object();
+                var delayInMs = (next.Value - now).TotalMilliseconds;
+                delayInMs = delayInMs < 0 ? 0 : delayInMs;
 
-            var executionResult = Parallel.ForEach(plan.GetFilesToBackup(), parallelOptions,
-                CreateTemporaryTarOutputStream,
-                (file, _, tuple) =>
+                _timer = new System.Timers.Timer(delayInMs);
+                _timer.Elapsed += async (sender, args) =>
                 {
-                    tuple.Archive.AddEntry(file);
-                    return tuple;
-                },
-                (tuple) =>
-                {
-                    using (var archive = tuple.Archive)
+                    _timer.Dispose();
+                    _timer = null!;
+
+                    if (!cancellationToken.IsCancellationRequested)
                     {
-                        lock (lockObject)
-                        {
-                            tuple.Archive.SaveToWithoutEndBlocks(tarFileStream);
-                        }
+                        await ExecutePlanAsync(plan, cancellationToken);
                     }
 
-                    File.Delete(tuple.Name);
-                });
-
-            return tarFileStream;
-        }
-
-        private void CreateGzip(BackupPlan plan, FileStream tarFileStream)
-        {
-            var gzFileName = $"{plan.Name}_{DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss")}.tar.gz";
-            using var gzFileStream = File.Open(gzFileName, FileMode.Create);
-            using var compressionStream = new GZipStream(gzFileStream, CompressionMode.Compress);
-
-            tarFileStream.Seek(0, SeekOrigin.Begin);
-
-            using var archive = TarArchive.Open(tarFileStream);
-            archive.SaveTo(compressionStream, new WriterOptions(CompressionType.None));
-        }
-
-        private (string Name, TarArchive Archive) CreateTemporaryTarOutputStream()
-        {
-            var fileName = Path.GetTempFileName();
-            var fileStream = new FileStream(fileName, FileMode.Open);
-            var archive = TarArchive.Open(fileStream, new ReaderOptions { LeaveStreamOpen = false });
-
-            return (Name: fileName, Archive: archive);
-        }
-
-        /*private (TarEntry Entry, byte[] Content) CreateGzippedEntry(string path)
-        {
-            MemoryStream compressedFileStream = new MemoryStream();
-            using (var compressionStream = new GZipStream(compressedFileStream, CompressionMode.Compress, true))
-            {
-                using var file = File.OpenRead(path);
-                file.CopyTo(compressionStream);
+                    if (!cancellationToken.IsCancellationRequested)
+                    {
+                        ScheduleJob(plan, cancellationToken);
+                    }
+                };
+                _timer.Start();
             }
-            compressedFileStream.Position = 0;
+        }
 
-            var entry = TarEntry.CreateTarEntry($"{path.Replace(Path.VolumeSeparatorChar.ToString(), string.Empty)}.gz");
-            entry.Size = compressedFileStream.Length;
+        protected Task<BackupPlan> ExecutePlanAsync(BackupPlan plan, CancellationToken stoppingToken)
+        {
+            var options = new TarWriterOptions(CompressionType.None, false);
 
-            var mem = new byte[compressedFileStream.Length];
-            compressedFileStream.Read(mem);
-            return (entry, mem.ToArray());
-        }*/
+            var certificate = X509Certificate.CreateFromCertFile("ftp.crt");
+            var credentials = new NetworkCredential("sandro", "");
+            var server = new FtpConnection(new Uri("ftp://192.168.1.4"), certificate, credentials);
+
+            _logger.LogInformation("Start backup plans.");
+
+            var backupFileName = $"{plan.UniqueName}.gz.tar";
+            using var uploadStream = server.OpenUploadStream($"Backup/sandro/{backupFileName}");
+            using var writer = new TarWriter(uploadStream, options);
+
+            _logger.LogDebug("Plan {Name} started at {StartDateTime} with file name {FileName}", plan.Name, DateTime.Now, backupFileName);
+
+            if(stoppingToken.IsCancellationRequested)
+            {
+                return (Task<BackupPlan>)Task.FromCanceled(stoppingToken);
+            }
+
+            foreach (var file in plan.GetFilesToBackup())
+            {
+                writer.AddGzipEntry(file);
+            }
+
+            _logger.LogInformation("Backup plans execution successfull.");
+
+            plan.LastExecution = _clock.GetCurrentInstant().ToLocalDateTime();
+            return Task.FromResult(plan);
+        }
+
+        public override async Task StopAsync(CancellationToken cancellationToken)
+        {
+            await base.StopAsync(cancellationToken);
+
+            _timer?.Stop();
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+
+            _timer?.Dispose();
+        }
     }
 }

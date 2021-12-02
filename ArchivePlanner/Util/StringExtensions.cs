@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace ArchivePlanner.Planning
+namespace ArchivePlanner.Util
 {
     public static class StringExtensions
     {

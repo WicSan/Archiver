@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Windows.Data;
-using ArchivePlanner.Planning;
 using ArchivePlanner.Util;
 using Archiver.Shared;
 

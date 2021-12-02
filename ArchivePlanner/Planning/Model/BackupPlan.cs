@@ -1,7 +1,9 @@
-﻿using NodaTime;
+﻿using ArchivePlanner.Util;
+using NodaTime;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace ArchivePlanner.Planning.Model
 {
@@ -13,9 +15,11 @@ namespace ArchivePlanner.Planning.Model
 
         public ICollection<FileSystemInfo> FileSystemItems { get; set; } = new List<FileSystemInfo>();
 
-        public LocalTime ExecutionStart { get; set; }
+        public ZonedDateTime? LastExecution { get; set; }
 
-        public DayOfWeek[] Interval { get; set; } = Array.Empty<DayOfWeek>();
+        public IsoDayOfWeek[] ExecutionDays { get; set; } = Array.Empty<IsoDayOfWeek>();
+
+        public LocalTime ExecutionTime { get; set; }
 
         public string UniqueName
         {
@@ -27,5 +31,16 @@ namespace ArchivePlanner.Planning.Model
         }
 
         public abstract IEnumerable<FileInfo> GetFilesToBackup();
+
+        public ZonedDateTime? CalculateNextExecution(ZonedDateTime now)
+        {
+            var nextExecution = ExecutionDays
+                .OrderBy(day => day)
+                .Select(day => (LastExecution ?? now.MinusDays(1)).LocalDateTime.Next(day))
+                .Select(date => date.Date.At(ExecutionTime))
+                .FirstOrDefault();
+            
+            return nextExecution == default ? null : nextExecution.InZoneStrictly(now.Zone);
+        }
     }
 }

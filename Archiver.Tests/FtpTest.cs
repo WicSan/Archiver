@@ -17,7 +17,7 @@ namespace Archiver.Tests
         {
             // Get the object used to communicate with the server.
             var certificate = X509Certificate.CreateFromCertFile("ftp.crt");
-            var credentials = new NetworkCredential("sandro", "Q8nR`ccw;x");
+            var credentials = new NetworkCredential("sandro", "");
             var server = new FtpConnection(new Uri("ftp://192.168.1.4"), certificate, credentials);
 
             using var stream = server.OpenUploadStream("/Backup/sandro/test_2021-10-31-18-21-54.gz");
@@ -31,7 +31,7 @@ namespace Archiver.Tests
         public void TestFTPUpload()
         {
             var certificate = X509Certificate.CreateFromCertFile("ftp.crt");
-            var credentials = new NetworkCredential("sandro", "Q8nR`ccw;x");
+            var credentials = new NetworkCredential("sandro", "");
             var server = new FtpConnection(new Uri("ftp://192.168.1.4"), certificate, credentials);
 
             server.UploadFileToFolder("/Backup/sandro", new FileInfo("test_2021-10-31-18-21-54.tar.gz"));

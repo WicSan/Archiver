@@ -1,9 +1,10 @@
 ﻿using ArchivePlanner;
+using ArchivePlanner.Backup;
 using ArchivePlanner.Planning;
+using ArchivePlanner.Util;
 using FastBackup.Planning;
-using LiteDB;
 using Microsoft.Extensions.DependencyInjection;
-using System.IO;
+using NodaTime;
 using System.Windows;
 
 namespace FastBackup
@@ -17,15 +18,6 @@ namespace FastBackup
 
         public App()
         {
-            BsonMapper.Global.RegisterType(
-                info => info.FullName,
-                bson => new DirectoryInfo(bson));
-
-            BsonMapper.Global.RegisterType(
-                info => info.FullName,
-                bson =>
-                    bson.AsString.ToFileSystemEntry());
-
             ServiceCollection services = new ServiceCollection();
             ConfigureServices(services);
             _serviceProvider = services.BuildServiceProvider();
@@ -39,8 +31,12 @@ namespace FastBackup
             services.AddSingleton<MainViewModel>();
             services.AddSingleton<BackupPlanViewModel>();
 
-            services.Configure<LiteDbOptions>((s) => s.DbName = "backup");
+            services.AddConfiguredLiteDb();
             services.AddSingleton<PlanningRepository>();
+
+            services.AddHostedService<ArchiverService>();
+
+            services.AddSingleton<IClock, SystemClock>();
         }
 
         protected override void OnStartup(StartupEventArgs e)

@@ -1,14 +1,11 @@
-using ArchivePlanner.Util;
-using SharpCompress.Archives.GZip;
-using SharpCompress.Archives.Tar;
+using ICSharpCode.SharpZipLib.Tar;
 using SharpCompress.Writers.Tar;
 using System;
-using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace FastBackup.Tests
@@ -18,8 +15,8 @@ namespace FastBackup.Tests
         [Fact]
         public void TestArchiveCreationZip()
         {
-            using (FileStream zipToOpen = new FileStream(@"../../../target/release.zip", FileMode.OpenOrCreate))
-            using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update))
+            using (var zipStream = new MemoryStream())
+            using (ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Update))
             {
                 archive.CreateEntryFromFile(@"D:\data\projects\general\FastBackup\FastBackup.Tests\BackupLibraryTest.cs", "BackupLibraryTest.cs", CompressionLevel.Fastest);
             }
@@ -28,11 +25,18 @@ namespace FastBackup.Tests
         [Fact]
         public void TestCreationGZip()
         {
-            using (FileStream zip = new FileStream(@"../../../target/release.gz", FileMode.Create))
+            var proc = Process.GetCurrentProcess();
+
+            using (var zip = new MemoryStream())
             using (GZipStream stream = new GZipStream(zip, CompressionMode.Compress))
             {
-                using var file = File.Open(@"C:\Users\sandr\Documents\My Games\Dawn of War 2\Settings\_keydefaults.lua", FileMode.Open);
+                var m1 = GC.GetTotalMemory(false);
+
+                using var file = File.Open(@"D:\downloads\ubuntu-20.04.2.0-desktop-amd64.iso", FileMode.Open);
                 file.CopyTo(stream);
+
+                var m2 = GC.GetTotalMemory(false);
+                var diff = m2 - m1;
             }
         }
 
@@ -55,23 +59,66 @@ namespace FastBackup.Tests
             }
             stream1.Seek(0, SeekOrigin.Begin);
             stream1.CopyTo(tarStream);
-
-
-            using var stream2 = new MemoryStream();
-            using (var writer2 = new TarWriter(stream2, options))
-            {
-                var file1 = new FileInfo(@"C:\Users\sandr\Documents\They Are Billions\Configuration.txt");
-
-                using (var entryStream = file1.OpenRead())
-                {
-                    writer2.Write(file1.FullName, entryStream, file1.LastWriteTime, file1.Length);
-                }
-            }
-            stream2.Seek(0, SeekOrigin.Begin);
-            stream2.CopyTo(tarStream);
         }
 
         [Fact]
+        public void TestCreationGzTar()
+        {
+            var options = new TarWriterOptions(SharpCompress.Common.CompressionType.None, false);
+            using var tarStream = new FileStream(@"C:\Users\sandr\Documents\test.gz.tar", FileMode.Create);
+
+            var files = Directory.EnumerateFiles(@"C:\Users\sandr\Documents\My Games", "*.*", new EnumerationOptions { IgnoreInaccessible = true, RecurseSubdirectories = true });
+
+            using (var writer = new TarWriter(tarStream, options))
+            {
+                foreach (var file in files.Select(f => new FileInfo(f)))
+                {
+                    using (var entryStream = file.OpenRead())
+                    {
+                        var tempfile = new FileInfo(Path.GetTempFileName());
+                        using var tempStream = tempfile.OpenWrite();
+
+                        using (var gzStream = new GZipStream(tempStream, CompressionMode.Compress, true))
+                        {
+                            entryStream.CopyTo(gzStream);
+                        }
+
+                        tempStream.Seek(0, SeekOrigin.Begin);
+                        writer.Write(file.FullName, tempStream, file.LastWriteTime, tempStream.Length);
+                        tempfile.Delete();
+                    }
+                }
+            }
+        }
+
+
+        [Fact]
+        public void TestCreationGzTarZipLib()
+        {
+            var options = new TarWriterOptions(SharpCompress.Common.CompressionType.None, false);
+            using var fileStream = new FileStream(@"C:\Users\sandr\Documents\test.gz.tar", FileMode.Create);
+
+            var files = Directory.EnumerateFiles(@"C:\Users\sandr\Documents\My Games", "*.*", new EnumerationOptions { IgnoreInaccessible = true, RecurseSubdirectories = true });
+
+            using (var tarStream = new TarOutputStream(fileStream, Encoding.UTF8))
+            {
+                foreach (var file in files.Select(f => new FileInfo(f)))
+                {
+                    using (var entryStream = file.OpenRead())
+                    {
+                        var entry = TarEntry.CreateEntryFromFile(file.FullName);
+                        tarStream.PutNextEntry(entry);
+
+                        using (var gzStream = new GZipStream(tarStream, CompressionMode.Compress, true))
+                        {
+                            entryStream.CopyTo(gzStream);
+                        }
+                    }
+                }
+            }
+        }
+
+        /*[Fact]
         public void TestCreationTarWithLibraryBug()
         {
             using var tarStream = new MemoryStream();
@@ -93,6 +140,6 @@ namespace FastBackup.Tests
 
             var blockSize = 512;
             Assert.Equal(4 * blockSize, tarStream.Length);
-        }
+        }*/
     }
 }
