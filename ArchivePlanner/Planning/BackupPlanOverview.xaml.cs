@@ -1,8 +1,7 @@
-﻿using ArchivePlanner.Planning;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 
-namespace FastBackup.Planning
+namespace ArchivePlanner.Planning
 {
     /// <summary>
     /// Interaction logic for CreateBackupPlan.xaml
@@ -11,21 +10,25 @@ namespace FastBackup.Planning
     {
         public BackupPlanOverview()
         {
-        }
-
-        public BackupPlanOverview(BackupPlanViewModel model)
-        {
             InitializeComponent();
-
-            DataContext = model;
         }
 
         private void FolderTreeView_OnSelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
             if (e.NewValue is FileSystemEntryViewModel item)
             {
-                ((BackupPlanViewModel)DataContext).SelectTreeViewItem((FileSystemEntryViewModel)e.NewValue);
+                ((BackupPlanOverviewViewModel)DataContext).SelectTreeViewItem(item);
             }
+        }
+
+        private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            ((BackupPlanOverviewViewModel)DataContext).Password = ((PasswordBox)sender).SecurePassword;
+        }
+
+        private void RemoteFolder_OnSelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            ((BackupPlanOverviewViewModel)DataContext).DestinationDirectory = ((RemoteFolderViewModel)e.NewValue).FullName;
         }
     }
 }

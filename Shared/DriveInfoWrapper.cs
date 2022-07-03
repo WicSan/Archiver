@@ -7,6 +7,11 @@ namespace Archiver.Shared
     {
         private readonly DriveInfo _wrapped;
 
+        public DriveInfoWrapper(string name)
+        {
+            _wrapped = new DriveInfo(name);
+        }
+
         public DriveInfoWrapper(DriveInfo wrapped)
         {
             _wrapped = wrapped;

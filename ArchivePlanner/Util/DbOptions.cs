@@ -1,6 +1,6 @@
-﻿namespace ArchivePlanner
+﻿namespace ArchivePlanner.Planning
 {
-    public class LiteDbOptions
+    public class DbOptions
     {
         public string DbName { get; set; } = null!;
     }

@@ -1,46 +1,83 @@
-﻿using ArchivePlanner.Util;
+﻿using ArchivePlanner.Planning.Database;
 using NodaTime;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
+using System.Text.Json.Serialization;
 
 namespace ArchivePlanner.Planning.Model
 {
-    public abstract class BackupPlan
+    public class BackupPlan : IEquatable<BackupPlan>, ICloneable
     {
+        [IdAttribute]
+        public Guid Id { get; set; }
+
         public string Name { get; set; } = null!;
 
-        public DirectoryInfo Destination { get; set; } = null!;
+        public FtpConnection Connection { get; set; }
+
+        public string DestinationFolder { get; set; } = null!;
+
+        public BackupSchedule Schedule { get; set; }
 
         public ICollection<FileSystemInfo> FileSystemItems { get; set; } = new List<FileSystemInfo>();
 
-        public ZonedDateTime? LastExecution { get; set; }
+        [JsonIgnore]
+        public double Progress { get; set; } = -1;
 
-        public IsoDayOfWeek[] ExecutionDays { get; set; } = Array.Empty<IsoDayOfWeek>();
+        public BackupPlan()
+        {
+            Connection = new FtpConnection();
+            Schedule = new DailyBackupSchedule(LocalTime.Noon);
+        }
 
-        public LocalTime ExecutionTime { get; set; }
+        public BackupPlan(BackupPlan plan) : this()
+        {
+            Name = plan.Name;
+            DestinationFolder = plan.DestinationFolder;
+            FileSystemItems = plan.FileSystemItems;
+            Schedule = (BackupSchedule)plan.Schedule.Clone();
+            Connection = (FtpConnection)plan.Connection.Clone();
+        }
 
-        public string UniqueName
+        public string FullName
         {
             get
             {
                 var timestamp = SystemClock.Instance.GetCurrentInstant().ToString("yyyy-MM-dd-HH-mm-ss", null);
-                return $"{Name}_{timestamp}";
+                var backupFileName = $"{Name}_{timestamp}";
+                var backupFullName = $"{DestinationFolder}/{backupFileName}";
+
+                if (backupFullName.StartsWith("/"))
+                {
+                    backupFullName = backupFullName.Remove(0, 1);
+                }
+                
+                return backupFullName;
             }
         }
 
-        public abstract IEnumerable<FileInfo> GetFilesToBackup();
+        public override bool Equals(object? obj) => this.Equals(obj as BackupPlan);
 
-        public ZonedDateTime? CalculateNextExecution(ZonedDateTime now)
+
+        public bool Equals(BackupPlan? other)
         {
-            var nextExecution = ExecutionDays
-                .OrderBy(day => day)
-                .Select(day => (LastExecution ?? now.MinusDays(1)).LocalDateTime.Next(day))
-                .Select(date => date.Date.At(ExecutionTime))
-                .FirstOrDefault();
-            
-            return nextExecution == default ? null : nextExecution.InZoneStrictly(now.Zone);
+            return Name.Equals(other?.Name, StringComparison.Ordinal);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Name);
+        }
+
+        public void ResetProgress()
+        {
+            Progress = -1;
+        }
+
+        public object Clone()
+        {
+            return new BackupPlan(this);
         }
     }
 }

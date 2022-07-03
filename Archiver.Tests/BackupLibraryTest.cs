@@ -18,8 +18,23 @@ namespace FastBackup.Tests
             using (var zipStream = new MemoryStream())
             using (ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Update))
             {
-                archive.CreateEntryFromFile(@"D:\data\projects\general\FastBackup\FastBackup.Tests\BackupLibraryTest.cs", "BackupLibraryTest.cs", CompressionLevel.Fastest);
+                archive.CreateEntry("test");
+                archive.CreateEntryFromFile(@"D:\data\projects\general\Archiver\Archiver.Tests\BackupLibraryTest.cs", "BackupLibraryTest.cs", CompressionLevel.Fastest);
             }
+        }
+
+        [Fact]
+        public void TestArchiveCreationZip2()
+        {
+            using var zipStream = File.OpenWrite("test.zip");
+            var archive = new ZipArchive(zipStream, ZipArchiveMode.Create);
+
+            var entry = archive.CreateEntry("test", CompressionLevel.NoCompression);
+
+            using var fileStream = new StreamReader(File.Open(@"D:\data\projects\general\Archiver\Archiver.Tests\BackupLibraryTest.cs", FileMode.Open));
+            var entryStream = new StreamWriter(entry.Open());
+            entryStream.Write(fileStream.ReadToEnd().Substring(0, 40));
+            entryStream.Flush();
         }
 
         [Fact]

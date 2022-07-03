@@ -7,7 +7,7 @@ using System.Windows.Data;
 using ArchivePlanner.Util;
 using Archiver.Shared;
 
-namespace FastBackup.Planning
+namespace ArchivePlanner.Planning
 {
     public class FileSystemEntryViewModel : ViewModelBase
     {
@@ -67,7 +67,7 @@ namespace FastBackup.Planning
             set
             {
                 _isChecked = value ?? true;
-                UpdateChildren(this);
+                UpdateChildren();
                 OnPropertyChanged();
             }
         }
@@ -114,9 +114,37 @@ namespace FastBackup.Planning
             Directories.Refresh();
         }
 
-        private void UpdateChildren(FileSystemEntryViewModel entry)
+        public void RestoreSelected(FileSystemInfo selectedInfo)
         {
-            foreach (var child in entry.Children.Where(c => c is not null))
+            if (selectedInfo.FullName.Contains(Info.FullName))
+            {
+                if (selectedInfo.FullName == Info.FullName)
+                {
+                    IsChecked = true;
+                }
+                else if(IsDrive || IsFolder)
+                {
+                    if (!HasChildren)
+                    {
+                        LoadChildren();
+                    }
+
+                    if (!HasChildren)
+                    {
+                        return;
+                    }
+                    
+                    foreach(var child in Children)
+                    {
+                        child!.RestoreSelected(selectedInfo);
+                    }
+                }
+            }
+        }
+
+        private void UpdateChildren()
+        {
+            foreach (var child in Children.Where(c => c is not null))
             {
                 child!.IsChecked = _isChecked;
             }
@@ -127,7 +155,7 @@ namespace FastBackup.Planning
             // Clear items
             Children.Clear();
 
-            // Show the expand arrow if we are not a file
+            // Show the expand arrow if it is not a file
             if (CanExpand)
                 Children.Add(null);
 
@@ -136,7 +164,7 @@ namespace FastBackup.Planning
 
         private void Expand()
         {
-            // We cannot expand a file
+            // Cannot expand a file
             if (!CanExpand || !Children.Any(c => c is null))
                 return;
 

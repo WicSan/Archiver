@@ -5,16 +5,16 @@ namespace ArchivePlanner.Util
 {
     public class RelayCommand<T> : ICommand
     {
-        private readonly Predicate<T?>? _canExecute;
-        private readonly Action<T?> _execute;
+        private readonly Predicate<T>? _canExecute;
+        private readonly Action<T> _execute;
 
-        public RelayCommand(Action<T?> execute)
+        public RelayCommand(Action<T> execute)
            : this(execute, null)
         {
             _execute = execute;
         }
 
-        public RelayCommand(Action<T?> execute, Predicate<T?>? canExecute)
+        public RelayCommand(Action<T> execute, Predicate<T>? canExecute)
         {
             if (execute == null)
             {
@@ -26,12 +26,12 @@ namespace ArchivePlanner.Util
 
         public bool CanExecute(object? parameter)
         {
-            return _canExecute == null || _canExecute((T?)parameter);
+            return parameter is not null && (_canExecute == null || _canExecute((T)parameter));
         }
 
         public void Execute(object? parameter)
         {
-            _execute((T?)parameter);
+            _execute((T)parameter!);
         }
 
         public event EventHandler? CanExecuteChanged

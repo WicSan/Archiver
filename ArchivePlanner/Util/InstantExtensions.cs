@@ -4,10 +4,10 @@ namespace ArchivePlanner.Util
 {
     public static class InstantExtensions
     {
-        public static ZonedDateTime ToLocalDateTime(this Instant instant)
+        public static LocalDateTime ToLocalDateTime(this Instant instant)
         {
             var systemZone = DateTimeZoneProviders.Tzdb.GetSystemDefault();
-            return instant.InZone(systemZone);
+            return instant.InZone(systemZone).LocalDateTime;
         }
     }
 }
