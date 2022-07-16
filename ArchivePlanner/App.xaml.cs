@@ -14,6 +14,8 @@ using Serilog;
 using Microsoft.Extensions.Logging;
 using FluentFTP;
 using ArchivePlanner.Planning.Model;
+using ArchivePlanner.Planning.Database;
+using System.Text.Json.Serialization;
 
 namespace FastBackup
 {
@@ -58,7 +60,14 @@ namespace FastBackup
             services.AddSingleton<MainViewModel>();
             services.AddSingleton<IBackupPlanOverviewViewModelFactory, BackupPlanOverviewViewModelFactory>();
 
-            services.AddOptions<DbOptions>().Configure(o => o.DbName = "archiver");
+            services.AddTransient<JsonConverter, LocalTimeConverter>();
+            services.AddTransient<JsonConverter, LocalDateTimeConverter>();
+            services.AddTransient<JsonConverter, FileSystemInfoConverter>();
+            services.AddTransient<JsonConverter, BackupScheduleConverter>();
+
+            services.AddOptions<JsonDatabaseOptions>().Configure(o => o.FileName = "archiver");
+            services.AddSingleton<JsonDatabase>();
+
             services.AddSingleton<IRepository<BackupPlan>, PlanningRepository>();
 
             services.AddSingleton<BackupService>();

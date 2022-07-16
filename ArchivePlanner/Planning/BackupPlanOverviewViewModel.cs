@@ -48,7 +48,7 @@ namespace ArchivePlanner.Planning
             SaveCommand = new RelayCommand(SavePlan);
             CancelCommand = new RelayCommand(Cancel);
             CheckConnectionCommand = new AsyncCommand(CheckConnection);
-            ChangeTypeCommand = new RelayCommand<Type>(ChangePlanType);
+            ChangeTypeCommand = new RelayCommand<Type>(ChangeScheduleType);
             BackupPlan = new BackupPlan();
         }
 
@@ -70,71 +70,12 @@ namespace ArchivePlanner.Planning
 
         public ObservableCollection<RemoteFolderViewModel> RemoteFolders { get; set; } = null!;
 
-        public string Name
-        {
-            get
-            {
-                return BackupPlan.Name;
-            }
-
-            set
-            {
-                BackupPlan.Name = value;
-                OnPropertyChanged();
-            }
-        }
-
         public double Progress
         {
             get => _progress;
             set
             {
                 _progress = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public string Host
-        {
-            get => _backupPlan.Connection.Host;
-
-            set
-            {
-                _backupPlan.Connection.Host = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public string Username
-        {
-            get => _backupPlan.Connection.Username;
-
-            set
-            {
-                _backupPlan.Connection.Username = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public SecureString Password
-        {
-            set
-            {
-                _backupPlan.Connection.Password = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public LocalTime ExecutionTime
-        {
-            get
-            {
-                return _backupPlan.Schedule.ExecutionTime;
-            }
-
-            set
-            {
-                _backupPlan.Schedule.ExecutionTime = value;
                 OnPropertyChanged();
             }
         }
@@ -311,7 +252,6 @@ namespace ArchivePlanner.Planning
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(DestinationDirectory));
                 OnPropertyChanged(nameof(IsSaveEnabled));
-                OnPropertyChanged(nameof(ExecutionTime));
                 OnPropertyChanged(nameof(IsDailySelected));
                 OnPropertyChanged(nameof(IsWeeklySelected));
                 OnPropertyChanged(nameof(IsMondayChecked));
@@ -321,9 +261,6 @@ namespace ArchivePlanner.Planning
                 OnPropertyChanged(nameof(IsFridayChecked));
                 OnPropertyChanged(nameof(IsSaturdayChecked));
                 OnPropertyChanged(nameof(IsSundayChecked));
-                OnPropertyChanged(nameof(Host));
-                OnPropertyChanged(nameof(Username));
-                OnPropertyChanged(nameof(Name));
 
                 ResetFolderListing();
 
@@ -437,7 +374,7 @@ namespace ArchivePlanner.Planning
             OnSavePlan?.Invoke(this, _backupPlan);
         }
 
-        private void ChangePlanType(Type type)
+        private void ChangeScheduleType(Type type)
         {
             BackupPlan.Schedule = (BackupSchedule)Activator.CreateInstance(type, BackupPlan.Schedule)!;
             OnPropertyChanged(nameof(IsDailySelected));

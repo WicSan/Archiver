@@ -1,7 +1,10 @@
-﻿using System;
+﻿using ArchivePlanner.Util;
+using Microsoft.Extensions.Options;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -13,20 +16,19 @@ namespace ArchivePlanner.Planning.Database
         private Stream? _stream;
         private JsonSerializerOptions _jsonSerializerOptions;
 
-        public JsonDatabase(string fileName)
+        public JsonDatabase(IOptions<JsonDatabaseOptions> options, IEnumerable<JsonConverter> converters)
         {
             _jsonSerializerOptions = new JsonSerializerOptions()
             {
                 DefaultIgnoreCondition = JsonIgnoreCondition.Never,
-                Converters =
-                {
-                    new LocalTimeConverter(),
-                    new LocalDateTimeConverter(),
-                    new FileSystemInfoConverter(),
-                    new BackupScheduleConverter(),
-                }
             };
-            _fileName = fileName;
+
+            foreach (var converter in converters)
+            {
+                _jsonSerializerOptions.Converters.Add(converter);
+            }
+
+            _fileName = $"{options.Value.FileName}.jdb";
         }
 
         private void EnsureFileStreamInitialized()
@@ -58,14 +60,21 @@ namespace ArchivePlanner.Planning.Database
 
         public void Upsert<T>(T entity)
         {
-            var entities = FindAll<T>();
+            var idProperty = typeof(T)
+                .GetProperties()
+                .Where(p => p.CustomAttributes.Any(a => a.AttributeType.Equals(typeof(IdAttribute))))
+                .Single();
+
+            var entities = FindAll<T>().ToDictionary(e => idProperty.GetValue(e)!);
+
+            var id = idProperty.GetValue(entity)!;
+            entities[id] = entity;
 
             EnsureFileStreamInitialized();
 
             using (var writer = new StreamWriter(_stream!))
             {
-                entities = entities.Append(entity);
-                var serializedEntities = JsonSerializer.Serialize(entities, _jsonSerializerOptions);
+                var serializedEntities = JsonSerializer.Serialize(entities.Values.ToList(), _jsonSerializerOptions);
                 writer.Write(serializedEntities);
             }
         }

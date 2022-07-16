@@ -23,7 +23,7 @@ namespace ArchivePlanner.Planning
 
         private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
         {
-            ((BackupPlanOverviewViewModel)DataContext).Password = ((PasswordBox)sender).SecurePassword;
+            ((BackupPlanOverviewViewModel)DataContext).BackupPlan.Connection.Password = ((PasswordBox)sender).SecurePassword;
         }
 
         private void RemoteFolder_OnSelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)

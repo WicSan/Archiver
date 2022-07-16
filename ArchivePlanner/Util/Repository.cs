@@ -14,28 +14,23 @@ namespace ArchivePlanner.Util
     public abstract class Repository<T> : IRepository<T>, IDisposable
         where T : class
     {
-        protected JsonDatabase? _db = null;
+        protected JsonDatabase _db;
         private readonly IdentityMap _identityMap;
         private readonly Subject<T> _changeStream;
-        private readonly IOptions<DbOptions> _options;
 
         public IObservable<T> ChangeStream => _changeStream;
 
-        public Repository(IOptions<DbOptions> options)
+        public Repository(JsonDatabase database)
         {
             _identityMap = new IdentityMap();
             _changeStream = new Subject<T>();
-            _options = options;
+            _db = database;
         }
 
         private JsonDatabase Database
         {
             get
             {
-                if (_db is null)
-                {
-                    _db = new JsonDatabase($"{_options.Value.DbName}.jdb");
-                }
                 return _db;
             }
         }

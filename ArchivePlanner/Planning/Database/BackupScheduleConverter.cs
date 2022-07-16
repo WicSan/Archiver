@@ -17,25 +17,25 @@ namespace ArchivePlanner.Planning.Database
 
             if (readerClone.TokenType != JsonTokenType.StartObject)
             {
-                throw new JsonException();
+                throw new JsonException("Json is no object");
             }
 
             readerClone.Read();
             if (readerClone.TokenType != JsonTokenType.PropertyName)
             {
-                throw new JsonException();
+                throw new JsonException("Property Type not found");
             }
 
             string? propertyName = readerClone.GetString();
             if (propertyName != "Type")
             {
-                throw new JsonException();
+                throw new JsonException("Property Type not found");
             }
 
             readerClone.Read();
             if (readerClone.TokenType != JsonTokenType.String)
             {
-                throw new JsonException();
+                throw new JsonException("Type property is not a string");
             }
 
             var type = Type.GetType(readerClone.GetString()!);

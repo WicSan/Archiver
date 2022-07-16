@@ -6,11 +6,12 @@
       xmlns:uc="clr-namespace:ArchivePlanner.Util"
       xmlns:c="clr-namespace:ArchivePlanner.Planning.Converters"
       xmlns:m="clr-namespace:ArchivePlanner.Planning.Model"
-      xmlns:noda="clr-namespace:NodaTime;assembly=NodaTime"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
-        <Grid IsEnabled="{Binding Path=Progress, Converter={c:ProgressToBooleanConverter}, ConverterParameter=Inverted}" Panel.ZIndex="1" Effect="{Binding Path=Progress, Converter={c:ProgressToBlurConverter}}" Margin="0,10,0,0">
+        <uc:CircularProgress HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding Progress, Converter={c:ProgressToVisibilityConverter}}"
+            Percentage="{Binding Progress}" StrokeThickness="20" Radius="80" Color="{DynamicResource Primary}" Panel.ZIndex="5" />
+        <Grid IsEnabled="{Binding Progress, ConverterParameter=Inverted, Converter={c:ProgressToBooleanConverter}}" Panel.ZIndex="1" Effect="{Binding Progress, Converter={c:ProgressToBlurConverter}}" Margin="0,10,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
@@ -22,17 +23,14 @@
             <Button Grid.Column="0" Grid.Row="0" x:Name="Cancel" Content="Cancel" Margin="668,6,0,0" Command="{Binding CancelCommand}" HorizontalAlignment="Left" Width="108" Height="34" VerticalAlignment="Top"/>
 
             <TabControl Grid.Row="1" Grid.Column="0" BorderBrush="#FFC3C3C3" BorderThickness="0,1,0,0">
-                <TabItem FontSize="14" Header="Destination">
-                    <TabItem.Background>
-                        <SolidColorBrush Color="White" />
-                    </TabItem.Background>
+                <TabItem FontSize="14" Header="Destination" Background="White">
                     <Grid>
                         <GroupBox Header="Connection" Margin="10,10,0,0" BorderBrush="#FFA1A6A9" Padding="5,0,0,0" Height="289" VerticalAlignment="Top" HorizontalAlignment="Left" Width="278">
                             <Grid>
                                 <Label FontSize="14" Content="Host" HorizontalAlignment="Left" Margin="2,13,0,0" VerticalAlignment="Top" Width="75"/>
-                                <TextBox Text="{Binding Host, UpdateSourceTrigger=LostFocus}" VerticalContentAlignment="Center" HorizontalAlignment="Left" Margin="82,10,0,0" TextWrapping="Wrap" Width="157" Height="34" VerticalAlignment="Top"/>
+                                <TextBox Text="{Binding BackupPlan.Connection.Host, UpdateSourceTrigger=LostFocus}" VerticalContentAlignment="Center" HorizontalAlignment="Left" Margin="82,10,0,0" TextWrapping="Wrap" Width="157" Height="34" VerticalAlignment="Top"/>
                                 <Label Content="Username" HorizontalAlignment="Left" Margin="2,52,0,0" VerticalAlignment="Top" Width="75"/>
-                                <TextBox Text="{Binding Username, UpdateSourceTrigger=LostFocus}" VerticalContentAlignment="Center" HorizontalAlignment="Left" Margin="82,49,0,0" TextWrapping="Wrap" Width="157" Height="34" VerticalAlignment="Top"/>
+                                <TextBox Text="{Binding BackupPlan.Connection.Username, UpdateSourceTrigger=LostFocus}" VerticalContentAlignment="Center" HorizontalAlignment="Left" Margin="82,49,0,0" TextWrapping="Wrap" Width="157" Height="34" VerticalAlignment="Top"/>
                                 <Label Content="Password" HorizontalAlignment="Left" Margin="2,91,0,0" VerticalAlignment="Top" Width="75"/>
                                 <PasswordBox VerticalContentAlignment="Center" PasswordChanged="PasswordBox_PasswordChanged" Height="34" Margin="82,88,0,0" Width="157" HorizontalAlignment="Left" VerticalAlignment="Top"/>
                                 <Button x:Name="Check" Content="Check" Command="{Binding CheckConnectionCommand}" HorizontalAlignment="Left" Width="108" Height="34" VerticalAlignment="Bottom" Margin="2,0,0,23"/>
@@ -61,10 +59,7 @@
                         </GroupBox>
                     </Grid>
                 </TabItem>
-                <TabItem Header="Files" FontSize="14" VerticalAlignment="Stretch">
-                    <TabItem.Background>
-                        <SolidColorBrush Color="White" />
-                    </TabItem.Background>
+                <TabItem Header="Files" FontSize="14" VerticalAlignment="Stretch" Background="White">
                     <Grid Margin="0,0,0,32" VerticalAlignment="Stretch">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition />
@@ -112,10 +107,7 @@
                         </ListView>
                     </Grid>
                 </TabItem>
-                <TabItem Header="Schedule" FontSize="14">
-                    <TabItem.Background>
-                        <SolidColorBrush Color="White" />
-                    </TabItem.Background>
+                <TabItem Header="Schedule" FontSize="14" Background="White">
                     <Grid Background="White">
                         <GroupBox Header="Execution" Margin="170,10,0,0" BorderBrush="#FFA1A6A9" Padding="5,5,0,0" HorizontalAlignment="Left" Width="329" Height="261" VerticalAlignment="Top">
                             <Grid>
@@ -134,7 +126,7 @@
                                     <CheckBox IsChecked="{Binding IsSundayChecked}" Content="Sunday"/>
                                 </StackPanel>
                                 <Label Content="At" HorizontalAlignment="Left" Margin="150,0,0,0" Width="37" VerticalContentAlignment="Center" Height="34" VerticalAlignment="Top"/>
-                                <uc:TimeBox Margin="203,0,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Time="{Binding ExecutionTime, Mode=TwoWay}" />
+                                <uc:TimeBox Margin="203,0,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Time="{Binding BackupPlan.Schedule.ExecutionTime, Mode=TwoWay}" />
                             </Grid>
                         </GroupBox>
 
@@ -153,10 +145,10 @@
                     </Grid>
                 </TabItem>
             </TabControl>
-            <TextBox Text="{Binding Name}" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="20" Margin="8,6,0,0" TextWrapping="Wrap" Width="390" Height="34"/>
+            <TextBox Text="{Binding BackupPlan.Name}" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="20" Margin="8,6,0,0" TextWrapping="Wrap" Width="268" Height="34"/>
+            <Label Content="Last execution:" HorizontalAlignment="Left" Margin="276,6,0,0" VerticalAlignment="Top" Height="17" Width="82" Foreground="Black" FontSize="11" Padding="5,0,5,0"/>
+            <Label Content="{Binding BackupPlan.Schedule.LastExecution, Converter={c:LocalDateTimeToStringConverter}}" HorizontalAlignment="Left" Margin="358,6,0,0" VerticalAlignment="Top" Height="17" Width="143" FontSize="11" Padding="5,0,5,0"/>
         </Grid>
-        <uc:CircularProgress HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding Path=Progress, Converter={c:ProgressToVisibilityConverter}}"
-            Percentage="{Binding Progress}" StrokeThickness="20" Radius="80" Color="{DynamicResource Primary}" Panel.ZIndex="5" />
     </Grid>
 
 </UserControl>
