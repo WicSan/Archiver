@@ -31,7 +31,7 @@ namespace Archiver.Tests
         {
             var fileName = "My Games.tar";
             var token = new CancellationTokenSource().Token;
-            var connection = new FtpConnection("192.168.1.4", "sandro", "AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAALVxxi1TbgU6ZJfLzgfs00gAAAAACAAAAAAAQZgAAAAEAACAAAAAy9RD+gLr0hvfrz4iO5Rkl91xWmLZhR2z9SzAWAiz4wgAAAAAOgAAAAAIAACAAAAAgUbrWh1v5qnTyywHhxEwEpOpgOeXFjynhWIfXzc25piAAAADpNfFwe14aIzIU7YVt8fMy6hzfE8RbeVU4krnPxtDSXUAAAABOumnGiKEvekLcHSsFPKLHs0lHIjR5jl6V7qdldYxET2gOki2Rv+bHV+DzGCozdBv8nCH0gf8ts9B5MBJ3iaq6");
+            var connection = new FtpConnection("192.168.1.4", "sandro", "");
             var loggerMock = new LoggerMock<FtpClient>(_output);
 
             using var client = new FtpClientFactory(true, loggerMock).CreateFtpClient(connection);

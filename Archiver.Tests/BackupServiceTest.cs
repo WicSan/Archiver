@@ -46,7 +46,7 @@ namespace Archiver.Tests
                 Name = "test",
                 DestinationFolder = "Backup/sandro",
                 Connection = new FtpConnection("192.168.1.4", "sandro",
-                    "AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAALVxxi1TbgU6ZJfLzgfs00gAAAAACAAAAAAAQZgAAAAEAACAAAAAy9RD+gLr0hvfrz4iO5Rkl91xWmLZhR2z9SzAWAiz4wgAAAAAOgAAAAAIAACAAAAAgUbrWh1v5qnTyywHhxEwEpOpgOeXFjynhWIfXzc25piAAAADpNfFwe14aIzIU7YVt8fMy6hzfE8RbeVU4krnPxtDSXUAAAABOumnGiKEvekLcHSsFPKLHs0lHIjR5jl6V7qdldYxET2gOki2Rv+bHV+DzGCozdBv8nCH0gf8ts9B5MBJ3iaq6"),
+                    ""),
                 Schedule = new WeeklyBackupSchedule(new LocalTime(8, 0), new List<IsoDayOfWeek> { IsoDayOfWeek.Monday }),
                 FileSystemItems = new List<FileSystemInfo>
                 {
