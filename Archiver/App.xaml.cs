@@ -17,7 +17,7 @@ using ArchivePlanner.Planning.Model;
 using ArchivePlanner.Planning.Database;
 using System.Text.Json.Serialization;
 
-namespace FastBackup
+namespace Archiver
 {
     /// <summary>
     /// Interaction logic for App.xaml
@@ -106,7 +106,7 @@ namespace FastBackup
         private void ConfigureTaskBarIcon()
         {
             var assembly = Assembly.GetExecutingAssembly();
-            using Stream iconStream = assembly.GetManifestResourceStream("ArchivePlanner.Resources.Icon.ico")!;
+            using Stream iconStream = assembly.GetManifestResourceStream("Archiver.Resources.Icon.ico")!;
 
             _notifyIcon.Icon = new Icon(iconStream);
             _notifyIcon.Visible = true;

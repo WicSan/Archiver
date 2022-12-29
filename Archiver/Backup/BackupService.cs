@@ -109,8 +109,9 @@ namespace ArchivePlanner.Backup
                 using (var gzipStream = new GZipStream(limitedStream, CompressionLevel.Fastest))
                 {
                     var progress = 0.0;
-                    var totalFiles = GetFilesToBackup(plan).Count();
-                    foreach (var file in GetFilesToBackup(plan))
+                    var files = GetFilesToBackup(plan).ToList();
+                    var totalFiles = files.Count();
+                    foreach (var file in files)
                     {
                         if (_externalToken.IsCancellationRequested)
                         {

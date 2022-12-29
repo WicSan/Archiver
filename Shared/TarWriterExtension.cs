@@ -1,12 +1,11 @@
-﻿using SharpCompress.Writers.Tar;
-using System.IO;
+﻿using System.IO;
 using System.IO.Compression;
 
 namespace ArchivePlanner.Util
 {
     public static class TarWriterExtension
     {
-        public static void AddGzipEntry(this TarWriter writer, FileInfo file)
+        /*public static void AddGzipEntry(this TarWriter writer, FileInfo file)
         {
             using var fileStream = file.OpenRead();
             var tempfile = new FileInfo("upload.tmp");
@@ -22,6 +21,6 @@ namespace ArchivePlanner.Util
             }
 
             tempfile.Delete();
-        }
+        }*/
     }
 }

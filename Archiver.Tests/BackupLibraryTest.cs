@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using Xunit;
 
-namespace FastBackup.Tests
+namespace Archiver.Tests
 {
     public class BackupLibraryTest
     {

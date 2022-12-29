@@ -4,7 +4,7 @@ using System.Windows;
 namespace ArchivePlanner
 {
     /// <summary>
-    /// Interaction logic for FastBackup.xaml
+    /// Interaction logic for Archiver.xaml
     /// </summary>
     public partial class MainWindow : Window
     {
