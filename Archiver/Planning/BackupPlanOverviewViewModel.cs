@@ -33,6 +33,8 @@ namespace Archiver.Planning
 
         public BackupPlanOverviewViewModel(IFtpClientFactory ftpClientFactory, IProgressService progressService, IClock clock, BackupPlan? plan)
         {
+            _progress = ProgressService.TaskCompleted;
+
             LoadOverview();
 
             BackupPlan = plan ?? new BackupPlan();
@@ -42,7 +44,7 @@ namespace Archiver.Planning
             _progressSubscription = _progressService.BackupProgress
                 .Where(p => p?.BackupId == _backupPlan!.Id)
                 .Subscribe(p => Progress = p!.Progress);
-
+            
             RemoteFolders = new ObservableCollection<RemoteFolderViewModel>();
 
             BrowseCommand = new RelayCommand(BrowseDirectories);

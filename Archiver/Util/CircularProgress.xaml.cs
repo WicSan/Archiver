@@ -108,11 +108,6 @@ namespace Archiver.Util
 
         public void RenderArcAndText()
         {
-            if(pathRoot is null)
-            {
-                return;
-            }
-
             Point startPoint = new Point(Radius, 0);
             Point endPoint = ComputeCartesianCoordinate(Angle, Radius);
             endPoint.X += Radius;
@@ -135,23 +130,16 @@ namespace Archiver.Util
             arcSegment.Size = outerArcSize;
             arcSegment.IsLargeArc = largeArc;
 
-            if(text.ActualWidth == 0)
+            var size = new Size(pathRoot.Width, pathRoot.Height);
+            if(text.ActualWidth == 0 || text.ActualHeight == 0)
             {
-                TextLeft = (int)((pathRoot.Width - pathRoot.Margin.Left) / 2 - 6);
+                Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+                Arrange(new Rect(0, 0, pathRoot.DesiredSize.Width, pathRoot.DesiredSize.Height));
             }
-            else
-            {
-                TextLeft = (int)((pathRoot.Width - pathRoot.Margin.Left) / 2 - text.ActualWidth / 2);
-            }
+            
+            TextLeft = (int)((pathRoot.Width - pathRoot.Margin.Left) / 2 - text.ActualWidth / 2);
+            TextTop = (int)((pathRoot.Height - pathRoot.Margin.Top) / 2 - text.ActualHeight / 2);
 
-            if(text.ActualHeight == 0)
-            {
-                TextTop = (int)((pathRoot.Height - pathRoot.Margin.Top) / 2 - 15);
-            }
-            else
-            {
-                TextTop = (int)((pathRoot.Height - pathRoot.Margin.Top) / 2 - text.ActualHeight / 2);
-            }
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TextTop)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TextLeft)));
         }
