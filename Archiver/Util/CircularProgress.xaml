@@ -13,9 +13,9 @@
     <StackPanel>
         <Canvas x:Name="pathRoot">
             <Path 
-                  Stroke="{Binding Brush, ElementName=userControl}" 
-                  StrokeThickness="{Binding StrokeThickness, ElementName=userControl}"
-                  HorizontalAlignment="Left" VerticalAlignment="Top">
+                Stroke="{Binding Brush, ElementName=userControl}" 
+                StrokeThickness="{Binding StrokeThickness, ElementName=userControl}"
+                HorizontalAlignment="Left" VerticalAlignment="Top">
                 <Path.Data>
                     <PathGeometry>
                         <PathGeometry.Figures>
@@ -24,7 +24,7 @@
                                     <PathFigure.Segments>
                                         <PathSegmentCollection>
                                             <ArcSegment x:Name="arcSegment"
-                                                        SweepDirection="Clockwise" />
+                                                    SweepDirection="Clockwise" />
                                         </PathSegmentCollection>
                                     </PathFigure.Segments>
                                 </PathFigure>
@@ -34,10 +34,10 @@
                 </Path.Data>
             </Path>
             <TextBlock x:Name="text"
-                Text="{Binding Percentage, Converter={StaticResource DoubleToPercentageConverter}, ElementName=userControl}"
-                       Canvas.Top="{Binding TextTop, ElementName=userControl}"
-                       Canvas.Left="{Binding TextLeft, ElementName=userControl}"
-                       FontSize="24" FontWeight="Normal" FontFamily="Arial Black"/>
+                        Text="{Binding Percentage, Converter={StaticResource DoubleToPercentageConverter}, ElementName=userControl}"
+                        Canvas.Top="{Binding TextTop, ElementName=userControl}"
+                        Canvas.Left="{Binding TextLeft, ElementName=userControl}"
+                        FontSize="24" FontWeight="Normal" FontFamily="Arial Black"/>
         </Canvas>
         <TextBlock Text="In Progress" HorizontalAlignment="Center" FontSize="24" FontWeight="Normal" FontFamily="Arial Black"/>
     </StackPanel>

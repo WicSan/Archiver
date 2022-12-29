@@ -1,4 +1,5 @@
-﻿using Archiver.Util;
+﻿using Archiver.Backup;
+using Archiver.Util;
 using System;
 using System.Globalization;
 
@@ -10,7 +11,7 @@ namespace Archiver.Planning.Converters
         {
             Enum.TryParse(typeof(Conditional), (string?)parameter, out var conditionalType);
             var isInverted = (Conditional?)conditionalType == Conditional.Inverted;
-            var inProgress = (double)value > 0 ? true : false;
+            var inProgress = (double)value == ProgressService.TaskCompleted ? false : true;
             return isInverted != inProgress;
         }
 

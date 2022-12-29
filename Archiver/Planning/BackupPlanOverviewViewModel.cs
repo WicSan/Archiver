@@ -398,6 +398,7 @@ namespace Archiver.Planning
 
             _backupPlan.Id = _originalBackupPlan.Id;
             OnSavePlan?.Invoke(this, _backupPlan);
+            OnPropertyChanged(nameof(NextExecution));
         }
 
         private void ChangeScheduleType(Type type)
@@ -412,7 +413,6 @@ namespace Archiver.Planning
             OnPropertyChanged(nameof(IsFridayChecked));
             OnPropertyChanged(nameof(IsSaturdayChecked));
             OnPropertyChanged(nameof(IsSundayChecked));
-            OnPropertyChanged(nameof(NextExecution));
         }
 
         private IEnumerable<FileSystemEntryViewModel> GetSelectedFileSystemEntries(IEnumerable<FileSystemEntryViewModel?> entries)

@@ -56,6 +56,7 @@ namespace Archiver
         private void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<MainWindow>();
+            services.AddSingleton<BackupPlanOverview>();
 
             services.AddSingleton<MainViewModel>();
             services.AddSingleton<IBackupPlanOverviewViewModelFactory, BackupPlanOverviewViewModelFactory>();
@@ -70,8 +71,7 @@ namespace Archiver
 
             services.AddSingleton<IRepository<BackupPlan>, PlanningRepository>();
 
-            services.AddSingleton<BackupService>();
-            services.AddHostedService(c => c.GetRequiredService<BackupService>()); ;
+            services.AddHostedService<BackupService>();
 
             services.AddSingleton<IClock>(c => SystemClock.Instance);
             services.AddSingleton(_notifyIcon);

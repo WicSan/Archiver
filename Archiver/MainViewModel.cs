@@ -19,14 +19,14 @@ namespace Archiver
 
         public RelayCommand AddCommand { get; }
 
-        public MainViewModel(IBackupPlanOverviewViewModelFactory viewModelFactory, IRepository<BackupPlan> repository)
+        public MainViewModel(IBackupPlanOverviewViewModelFactory viewModelFactory, IRepository<BackupPlan> repository, BackupPlanOverview planView)
         {
             _viewModelFactory = viewModelFactory;
             _repository = repository;
 
             AddCommand = new RelayCommand(AddNewPlan);
 
-            PlanView = new BackupPlanOverview();
+            PlanView = planView;
             AddNewPlan();
         }
 

@@ -3,11 +3,8 @@
                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-                   xmlns:local="clr-namespace:Archiver.Planning"
                     mc:Ignorable="d"
                    Title="Archiver" Height="500" Width="1019" WindowStyle="SingleBorderWindow" Loaded="Window_Loaded" Closing="Window_Closing" Icon="Resources/Icon_black.ico">
-    <Window.Resources>
-    </Window.Resources>
     <DockPanel>
         <DockPanel Height="Auto" DockPanel.Dock="Left">
             <Button DockPanel.Dock="Bottom" Height="37" Command="{Binding AddCommand}">Add new backup</Button>

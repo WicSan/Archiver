@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Globalization;
-using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -44,9 +43,8 @@ namespace Archiver.Util
         public CircularProgress()
         {
             InitializeComponent();
-            Angle = (Percentage * 360) / 100;
+
             Brush = new SolidColorBrush(Color);
-            RenderArc();
         }
 
         public int Radius
@@ -100,17 +98,21 @@ namespace Archiver.Util
         {
             CircularProgress circle = (CircularProgress)sender;
             if (circle.Percentage > 100) circle.Percentage = 100;
-            circle.Angle = (circle.Percentage * 360) / 100;
+            circle.Angle = circle.Percentage * 360;
         }
 
         private static void OnPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
-            CircularProgress circle = (CircularProgress)sender;
-            circle.RenderArc();
+            ((CircularProgress)sender).RenderArcAndText();
         }
 
-        public void RenderArc()
+        public void RenderArcAndText()
         {
+            if(pathRoot is null)
+            {
+                return;
+            }
+
             Point startPoint = new Point(Radius, 0);
             Point endPoint = ComputeCartesianCoordinate(Angle, Radius);
             endPoint.X += Radius;
@@ -133,8 +135,23 @@ namespace Archiver.Util
             arcSegment.Size = outerArcSize;
             arcSegment.IsLargeArc = largeArc;
 
-            TextTop = (int)pathRoot.Height / 2 - 20;
-            TextLeft = (int)pathRoot.Width / 2 - 35;
+            if(text.ActualWidth == 0)
+            {
+                TextLeft = (int)((pathRoot.Width - pathRoot.Margin.Left) / 2 - 6);
+            }
+            else
+            {
+                TextLeft = (int)((pathRoot.Width - pathRoot.Margin.Left) / 2 - text.ActualWidth / 2);
+            }
+
+            if(text.ActualHeight == 0)
+            {
+                TextTop = (int)((pathRoot.Height - pathRoot.Margin.Top) / 2 - 15);
+            }
+            else
+            {
+                TextTop = (int)((pathRoot.Height - pathRoot.Margin.Top) / 2 - text.ActualHeight / 2);
+            }
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TextTop)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TextLeft)));
         }

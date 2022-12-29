@@ -5,6 +5,7 @@ namespace Archiver.Backup
 {
     public class ProgressService : IProgressService
     {
+        public static readonly int TaskCompleted = -1;
         private readonly BehaviorSubject<BackupProgress?> _progressStream = new (null);
 
         public ProgressService()
