@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace ArchivePlanner.Planning.Database
+namespace Archiver.Planning.Database
 {
     public class JsonDatabase : IDisposable
     {

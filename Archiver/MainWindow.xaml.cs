@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using System.Windows;
 
-namespace ArchivePlanner
+namespace Archiver
 {
     /// <summary>
     /// Interaction logic for Archiver.xaml

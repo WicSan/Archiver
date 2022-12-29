@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 
-namespace ArchivePlanner.Planning
+namespace Archiver.Planning
 {
     /// <summary>
     /// Interaction logic for CreateBackupPlan.xaml

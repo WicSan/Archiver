@@ -4,7 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-namespace ArchivePlanner.Util
+namespace Archiver.Util
 {
     /// <summary>
     /// Interaction logic for TimeBox.xaml

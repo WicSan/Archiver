@@ -4,7 +4,7 @@ using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace ArchivePlanner.Planning.Database
+namespace Archiver.Planning.Database
 {
     public class FileSystemInfoConverter : JsonConverter<FileSystemInfo>
     {

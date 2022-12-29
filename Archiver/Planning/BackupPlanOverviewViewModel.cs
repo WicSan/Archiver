@@ -8,14 +8,14 @@ using System.Security;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
-using ArchivePlanner.Backup;
-using ArchivePlanner.Planning.Model;
-using ArchivePlanner.Util;
+using Archiver.Backup;
+using Archiver.Planning.Model;
+using Archiver.Util;
 using Archiver.Shared;
 using FluentFTP;
 using NodaTime;
 
-namespace ArchivePlanner.Planning
+namespace Archiver.Planning
 {
     public class BackupPlanOverviewViewModel : ViewModelBase, IDisposable
     {

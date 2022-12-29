@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Windows.Data;
 using System.Windows.Markup;
 
-namespace ArchivePlanner.Util
+namespace Archiver.Util
 {
     public abstract class BaseConverter : MarkupExtension, IValueConverter
     {

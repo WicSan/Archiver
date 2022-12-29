@@ -1,5 +1,5 @@
-﻿using ArchivePlanner.Planning.Model;
-using ArchivePlanner.Util;
+﻿using Archiver.Planning.Model;
+using Archiver.Util;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
@@ -8,7 +8,7 @@ using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ArchivePlanner.Backup
+namespace Archiver.Backup
 {
     public class MockBackupService : BackgroundService
     {

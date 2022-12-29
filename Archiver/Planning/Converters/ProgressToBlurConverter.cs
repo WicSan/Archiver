@@ -1,11 +1,11 @@
-﻿using ArchivePlanner.Util;
+﻿using Archiver.Util;
 using System;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media.Effects;
 
-namespace ArchivePlanner.Planning.Converters
+namespace Archiver.Planning.Converters
 {
     public class ProgressToBlurConverter : BaseConverter
     {

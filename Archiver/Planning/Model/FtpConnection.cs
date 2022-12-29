@@ -1,9 +1,9 @@
-﻿using ArchivePlanner.Util;
+﻿using Archiver.Util;
 using System;
 using System.Security;
 using System.Text.Json.Serialization;
 
-namespace ArchivePlanner.Planning.Model
+namespace Archiver.Planning.Model
 {
     public class FtpConnection : ICloneable
     {

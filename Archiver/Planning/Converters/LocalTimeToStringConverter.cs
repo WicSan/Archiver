@@ -1,9 +1,9 @@
-﻿using ArchivePlanner.Util;
+﻿using Archiver.Util;
 using NodaTime;
 using System;
 using System.Globalization;
 
-namespace ArchivePlanner.Planning.Converters
+namespace Archiver.Planning.Converters
 {
     public class LocalDateTimeToStringConverter : BaseConverter
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Security;
 
-namespace ArchivePlanner.Util
+namespace Archiver.Util
 {
     public class Security
     {

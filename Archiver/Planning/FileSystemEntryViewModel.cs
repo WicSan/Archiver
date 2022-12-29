@@ -4,10 +4,10 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Windows.Data;
-using ArchivePlanner.Util;
+using Archiver.Util;
 using Archiver.Shared;
 
-namespace ArchivePlanner.Planning
+namespace Archiver.Planning
 {
     public class FileSystemEntryViewModel : ViewModelBase
     {

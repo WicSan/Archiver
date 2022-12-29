@@ -1,9 +1,9 @@
-﻿using ArchivePlanner.Planning.Database;
-using ArchivePlanner.Planning.Model;
-using ArchivePlanner.Util;
+﻿using Archiver.Planning.Database;
+using Archiver.Planning.Model;
+using Archiver.Util;
 using Microsoft.Extensions.Options;
 
-namespace ArchivePlanner.Planning
+namespace Archiver.Planning
 {
     public class PlanningRepository : Repository<BackupPlan>
     {

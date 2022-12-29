@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ArchivePlanner.Util
+namespace Archiver.Util
 {
     // https://docs.microsoft.com/en-us/dotnet/api/system.threading.tasks.taskscheduler?view=net-6.0
     public class LimitedConcurrencyLevelTaskScheduler : TaskScheduler

@@ -1,7 +1,7 @@
-﻿using ArchivePlanner.Planning.Model;
-using ArchivePlanner.Util;
+﻿using Archiver.Planning.Model;
+using Archiver.Util;
 
-namespace ArchivePlanner
+namespace Archiver
 {
     public class BackupPlanListItemViewModel : ViewModelBase
     {

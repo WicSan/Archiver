@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace ArchivePlanner.Planning.Model
+namespace Archiver.Planning.Model
 {
     public class WeeklyBackupSchedule : BackupSchedule
     {

@@ -5,7 +5,7 @@ using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ArchivePlanner.Util
+namespace Archiver.Util
 {
     public static class FtpClientExtensions
     {

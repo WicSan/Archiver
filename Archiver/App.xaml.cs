@@ -1,7 +1,7 @@
-﻿using ArchivePlanner;
-using ArchivePlanner.Backup;
-using ArchivePlanner.Planning;
-using ArchivePlanner.Util;
+﻿using Archiver;
+using Archiver.Backup;
+using Archiver.Planning;
+using Archiver.Util;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using NodaTime;
@@ -13,8 +13,8 @@ using System.Windows;
 using Serilog;
 using Microsoft.Extensions.Logging;
 using FluentFTP;
-using ArchivePlanner.Planning.Model;
-using ArchivePlanner.Planning.Database;
+using Archiver.Planning.Model;
+using Archiver.Planning.Database;
 using System.Text.Json.Serialization;
 
 namespace Archiver

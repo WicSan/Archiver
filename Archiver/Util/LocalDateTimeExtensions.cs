@@ -1,6 +1,6 @@
 ﻿using NodaTime;
 
-namespace ArchivePlanner.Util
+namespace Archiver.Util
 {
     public static class LocalDateTimeExtensions
     {

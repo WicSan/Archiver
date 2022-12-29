@@ -1,6 +1,6 @@
-﻿using ArchivePlanner.Planning;
-using ArchivePlanner.Planning.Model;
-using ArchivePlanner.Util;
+﻿using Archiver.Planning;
+using Archiver.Planning.Model;
+using Archiver.Util;
 using FluentFTP;
 using Microsoft.Extensions.Logging;
 using Moq;

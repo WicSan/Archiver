@@ -5,7 +5,7 @@ using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace ArchivePlanner.Planning.Database
+namespace Archiver.Planning.Database
 {
     public class LocalTimeConverter: JsonConverter<LocalTime>
     {

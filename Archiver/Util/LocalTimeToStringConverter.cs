@@ -4,7 +4,7 @@ using System;
 using System.Globalization;
 using System.Windows.Data;
 
-namespace ArchivePlanner.Util
+namespace Archiver.Util
 {
     public class LocalTimeToStringConverter : IValueConverter
     {

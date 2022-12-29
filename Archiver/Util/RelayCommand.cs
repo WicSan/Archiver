@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Windows.Input;
 
-namespace ArchivePlanner.Util
+namespace Archiver.Util
 {
     public class RelayCommand : ICommand
     {

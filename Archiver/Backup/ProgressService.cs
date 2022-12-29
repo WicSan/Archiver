@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reactive.Subjects;
 
-namespace ArchivePlanner.Backup
+namespace Archiver.Backup
 {
     public class ProgressService : IProgressService
     {

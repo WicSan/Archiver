@@ -1,8 +1,8 @@
-﻿using ArchivePlanner.Backup;
-using ArchivePlanner.Planning.Model;
+﻿using Archiver.Backup;
+using Archiver.Planning.Model;
 using NodaTime;
 
-namespace ArchivePlanner.Planning
+namespace Archiver.Planning
 {
     public class BackupPlanOverviewViewModelFactory : IBackupPlanOverviewViewModelFactory
     {

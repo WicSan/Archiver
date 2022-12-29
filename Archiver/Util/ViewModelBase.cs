@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace ArchivePlanner.Util
+namespace Archiver.Util
 {
     public abstract class ViewModelBase : INotifyPropertyChanged
     {

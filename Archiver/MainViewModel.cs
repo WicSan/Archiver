@@ -1,11 +1,11 @@
-﻿using ArchivePlanner.Planning;
-using ArchivePlanner.Planning.Model;
-using ArchivePlanner.Util;
+﻿using Archiver.Planning;
+using Archiver.Planning.Model;
+using Archiver.Util;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace ArchivePlanner
+namespace Archiver
 {
     public class MainViewModel : ViewModelBase
     {

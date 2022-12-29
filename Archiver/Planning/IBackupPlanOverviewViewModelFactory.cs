@@ -1,6 +1,6 @@
-﻿using ArchivePlanner.Planning.Model;
+﻿using Archiver.Planning.Model;
 
-namespace ArchivePlanner.Planning
+namespace Archiver.Planning
 {
     public interface IBackupPlanOverviewViewModelFactory
     {

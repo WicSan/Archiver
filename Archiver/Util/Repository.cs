@@ -1,5 +1,5 @@
-﻿using ArchivePlanner.Planning;
-using ArchivePlanner.Planning.Database;
+﻿using Archiver.Planning;
+using Archiver.Planning.Database;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ArchivePlanner.Util
+namespace Archiver.Util
 {
     public abstract class Repository<T> : IRepository<T>, IDisposable
         where T : class

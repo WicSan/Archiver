@@ -1,4 +1,4 @@
-﻿namespace ArchivePlanner.Planning.Database
+﻿namespace Archiver.Planning.Database
 {
     public class JsonDatabaseOptions
     {

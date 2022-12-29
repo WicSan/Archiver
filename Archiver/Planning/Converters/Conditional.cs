@@ -1,4 +1,4 @@
-﻿namespace ArchivePlanner.Planning.Converters
+﻿namespace Archiver.Planning.Converters
 {
     public enum Conditional
     {

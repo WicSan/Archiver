@@ -1,7 +1,7 @@
 ﻿using NodaTime;
 using System;
 
-namespace ArchivePlanner.Planning.Model
+namespace Archiver.Planning.Model
 {
     public abstract class BackupSchedule : ICloneable
     {

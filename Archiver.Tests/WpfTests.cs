@@ -1,8 +1,8 @@
-﻿using ArchivePlanner;
-using ArchivePlanner.Backup;
-using ArchivePlanner.Planning;
-using ArchivePlanner.Planning.Model;
-using ArchivePlanner.Util;
+﻿using Archiver;
+using Archiver.Backup;
+using Archiver.Planning;
+using Archiver.Planning.Model;
+using Archiver.Util;
 using Moq;
 using NodaTime;
 using NodaTime.Testing;

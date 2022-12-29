@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using System.Windows.Input;
 
-namespace ArchivePlanner.Util
+namespace Archiver.Util
 {
     public interface IAsyncCommand : ICommand
     {

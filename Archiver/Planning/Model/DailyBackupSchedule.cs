@@ -1,6 +1,6 @@
 ﻿using NodaTime;
 
-namespace ArchivePlanner.Planning.Model
+namespace Archiver.Planning.Model
 {
     public class DailyBackupSchedule : BackupSchedule
     {

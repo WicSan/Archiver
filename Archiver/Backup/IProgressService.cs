@@ -1,7 +1,7 @@
-﻿using ArchivePlanner.Planning.Model;
+﻿using Archiver.Planning.Model;
 using System;
 
-namespace ArchivePlanner.Backup
+namespace Archiver.Backup
 {
     public interface IProgressService
     {

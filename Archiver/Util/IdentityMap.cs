@@ -1,9 +1,9 @@
-﻿using ArchivePlanner.Planning.Database;
+﻿using Archiver.Planning.Database;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace ArchivePlanner.Util
+namespace Archiver.Util
 {
     public class IdentityMap
     {

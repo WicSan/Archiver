@@ -1,4 +1,4 @@
-﻿namespace ArchivePlanner.Planning.Database
+﻿namespace Archiver.Planning.Database
 {
     internal class TypeDiscriminator
     {

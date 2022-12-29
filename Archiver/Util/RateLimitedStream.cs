@@ -4,7 +4,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ArchivePlanner.Util
+namespace Archiver.Util
 {
     public class RateLimitedStream : Stream, IDisposable
     {

@@ -2,7 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 
-namespace ArchivePlanner.Planning
+namespace Archiver.Planning
 {
     public class RemoteFolderViewModel
     {

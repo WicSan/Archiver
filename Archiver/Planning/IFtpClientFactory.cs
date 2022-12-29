@@ -1,7 +1,7 @@
-﻿using ArchivePlanner.Planning.Model;
+﻿using Archiver.Planning.Model;
 using FluentFTP;
 
-namespace ArchivePlanner.Planning
+namespace Archiver.Planning
 {
     public interface IFtpClientFactory
     {

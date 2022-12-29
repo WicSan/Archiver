@@ -1,8 +1,8 @@
-﻿using ArchivePlanner.Util;
+﻿using Archiver.Util;
 using System;
 using System.Globalization;
 
-namespace ArchivePlanner.Planning.Converters
+namespace Archiver.Planning.Converters
 {
     public class ScheduleToBooleanConverter : BaseConverter
     {

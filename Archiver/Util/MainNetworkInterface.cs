@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using System.Net.NetworkInformation;
 
-namespace ArchivePlanner.Util
+namespace Archiver.Util
 {
     public class MainNetworkInterface
     {

@@ -1,11 +1,11 @@
-﻿using ArchivePlanner.Planning.Model;
+﻿using Archiver.Planning.Model;
 using FluentFTP;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
 
-namespace ArchivePlanner.Planning
+namespace Archiver.Planning
 {
     public class FtpClientFactory : IFtpClientFactory
     {

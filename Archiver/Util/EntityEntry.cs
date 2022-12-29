@@ -1,4 +1,4 @@
-﻿namespace ArchivePlanner.Util
+﻿namespace Archiver.Util
 {
     public class EntityEntry
     {

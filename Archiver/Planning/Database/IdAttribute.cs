@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ArchivePlanner.Planning.Database
+namespace Archiver.Planning.Database
 {
     [AttributeUsage(AttributeTargets.Property)]
     public class IdAttribute: Attribute

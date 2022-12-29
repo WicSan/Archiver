@@ -1,11 +1,11 @@
-﻿using ArchivePlanner.Planning.Database;
+﻿using Archiver.Planning.Database;
 using NodaTime;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json.Serialization;
 
-namespace ArchivePlanner.Planning.Model
+namespace Archiver.Planning.Model
 {
     public class BackupPlan : IEquatable<BackupPlan>, ICloneable
     {
