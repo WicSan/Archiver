@@ -151,16 +151,16 @@ namespace ArchivePlanner.Util
         }
     }
 
-    internal class PercentageConverter : IValueConverter
+    internal class DoubleToPercentageConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return $"{value} %";
+            return ((double)value).ToString("P2");
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return 1;
+            throw new NotImplementedException();
         }
     }
 }

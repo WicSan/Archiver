@@ -1,10 +1,8 @@
-﻿using ArchivePlanner.Util;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -76,6 +74,7 @@ namespace ArchivePlanner.Planning.Database
             {
                 var serializedEntities = JsonSerializer.Serialize(entities.Values.ToList(), _jsonSerializerOptions);
                 writer.Write(serializedEntities);
+                _stream!.SetLength(serializedEntities.Length);
             }
         }
 

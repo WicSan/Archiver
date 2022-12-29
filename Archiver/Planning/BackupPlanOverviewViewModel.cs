@@ -25,20 +25,23 @@ namespace ArchivePlanner.Planning
         private IFtpClientFactory _ftpFactory;
         private double _progress;
         private readonly IProgressService _progressService;
+        private readonly IClock _clock;
         private readonly IDisposable _progressSubscription;
 
         public event EventHandler<BackupPlan>? OnSavePlan;
         public event EventHandler? OnCancel;
 
-        public BackupPlanOverviewViewModel(IFtpClientFactory ftpClientFactory, IProgressService progressService)
+        public BackupPlanOverviewViewModel(IFtpClientFactory ftpClientFactory, IProgressService progressService, IClock clock, BackupPlan? plan)
         {
             LoadOverview();
 
+            BackupPlan = plan ?? new BackupPlan();
             _ftpFactory = ftpClientFactory;
             _progressService = progressService;
+            _clock = clock;
             _progressSubscription = _progressService.BackupProgress
-                .Where(p => p?.Id == _backupPlan?.Id)
-                .Subscribe(p => Progress = p?.Progress ?? -1);
+                .Where(p => p?.BackupId == _backupPlan!.Id)
+                .Subscribe(p => Progress = p!.Progress);
 
             RemoteFolders = new ObservableCollection<RemoteFolderViewModel>();
 
@@ -49,7 +52,6 @@ namespace ArchivePlanner.Planning
             CancelCommand = new RelayCommand(Cancel);
             CheckConnectionCommand = new AsyncCommand(CheckConnection);
             ChangeTypeCommand = new RelayCommand<Type>(ChangeScheduleType);
-            BackupPlan = new BackupPlan();
         }
 
         public bool IsSaveEnabled => DestinationDirectory is not null;
@@ -80,6 +82,15 @@ namespace ArchivePlanner.Planning
             }
         }
 
+        public LocalDateTime NextExecution
+        {
+            get
+            {
+                var now = _clock.GetCurrentInstant().ToLocalDateTime();
+                return _backupPlan.Schedule.NextExecution(now);
+            }
+        }
+
         public bool IsDailySelected
         {
             get
@@ -101,14 +112,16 @@ namespace ArchivePlanner.Planning
             get => _backupPlan.Schedule is WeeklyBackupSchedule plan && plan.ExecutionDays.Contains(IsoDayOfWeek.Monday);
             set
             {
+                var executionDays = ((WeeklyBackupSchedule)_backupPlan.Schedule).ExecutionDays;
                 if (value)
                 {
-                    ((WeeklyBackupSchedule)_backupPlan.Schedule).ExecutionDays.Add(IsoDayOfWeek.Monday);
+                    executionDays.Add(IsoDayOfWeek.Monday);
                 }
-                else
+                else if (executionDays.Count > 1)
                 {
-                    ((WeeklyBackupSchedule)_backupPlan.Schedule).ExecutionDays.Remove(IsoDayOfWeek.Monday);
+                    executionDays.Remove(IsoDayOfWeek.Monday);
                 }
+                OnPropertyChanged(nameof(NextExecution));
                 OnPropertyChanged();
             }
         }
@@ -118,14 +131,16 @@ namespace ArchivePlanner.Planning
             get => _backupPlan.Schedule is WeeklyBackupSchedule plan && plan.ExecutionDays.Contains(IsoDayOfWeek.Tuesday);
             set
             {
+                var executionDays = ((WeeklyBackupSchedule)_backupPlan.Schedule).ExecutionDays;
                 if (value)
                 {
-                    ((WeeklyBackupSchedule)_backupPlan.Schedule).ExecutionDays.Add(IsoDayOfWeek.Tuesday);
+                    executionDays.Add(IsoDayOfWeek.Tuesday);
                 }
-                else
+                else if (executionDays.Count > 1)
                 {
-                    ((WeeklyBackupSchedule)_backupPlan.Schedule).ExecutionDays.Remove(IsoDayOfWeek.Tuesday);
+                    executionDays.Remove(IsoDayOfWeek.Tuesday);
                 }
+                OnPropertyChanged(nameof(NextExecution));
                 OnPropertyChanged();
             }
         }
@@ -135,14 +150,16 @@ namespace ArchivePlanner.Planning
             get => _backupPlan.Schedule is WeeklyBackupSchedule plan && plan.ExecutionDays.Contains(IsoDayOfWeek.Wednesday);
             set
             {
+                var executionDays = ((WeeklyBackupSchedule)_backupPlan.Schedule).ExecutionDays;
                 if (value)
                 {
-                    ((WeeklyBackupSchedule)_backupPlan.Schedule).ExecutionDays.Add(IsoDayOfWeek.Wednesday);
+                    executionDays.Add(IsoDayOfWeek.Wednesday);
                 }
-                else
+                else if (executionDays.Count > 1)
                 {
-                    ((WeeklyBackupSchedule)_backupPlan.Schedule).ExecutionDays.Remove(IsoDayOfWeek.Wednesday);
+                    executionDays.Remove(IsoDayOfWeek.Wednesday);
                 }
+                OnPropertyChanged(nameof(NextExecution));
                 OnPropertyChanged();
             }
         }
@@ -152,14 +169,16 @@ namespace ArchivePlanner.Planning
             get => _backupPlan.Schedule is WeeklyBackupSchedule plan && plan.ExecutionDays.Contains(IsoDayOfWeek.Thursday);
             set
             {
+                var executionDays = ((WeeklyBackupSchedule)_backupPlan.Schedule).ExecutionDays;
                 if (value)
                 {
-                    ((WeeklyBackupSchedule)_backupPlan.Schedule).ExecutionDays.Add(IsoDayOfWeek.Thursday);
+                    executionDays.Add(IsoDayOfWeek.Thursday);
                 }
-                else
+                else if (executionDays.Count > 1)
                 {
-                    ((WeeklyBackupSchedule)_backupPlan.Schedule).ExecutionDays.Remove(IsoDayOfWeek.Thursday);
+                    executionDays.Remove(IsoDayOfWeek.Thursday);
                 }
+                OnPropertyChanged(nameof(NextExecution));
                 OnPropertyChanged();
             }
         }
@@ -169,14 +188,16 @@ namespace ArchivePlanner.Planning
             get => _backupPlan.Schedule is WeeklyBackupSchedule plan && plan.ExecutionDays.Contains(IsoDayOfWeek.Friday);
             set
             {
+                var executionDays = ((WeeklyBackupSchedule)_backupPlan.Schedule).ExecutionDays;
                 if (value)
                 {
-                    ((WeeklyBackupSchedule)_backupPlan.Schedule).ExecutionDays.Add(IsoDayOfWeek.Friday);
+                    executionDays.Add(IsoDayOfWeek.Friday);
                 }
-                else
+                else if (executionDays.Count > 1)
                 {
-                    ((WeeklyBackupSchedule)_backupPlan.Schedule).ExecutionDays.Remove(IsoDayOfWeek.Friday);
+                    executionDays.Remove(IsoDayOfWeek.Friday);
                 }
+                OnPropertyChanged(nameof(NextExecution));
                 OnPropertyChanged();
             }
         }
@@ -186,14 +207,16 @@ namespace ArchivePlanner.Planning
             get => _backupPlan.Schedule is WeeklyBackupSchedule plan && plan.ExecutionDays.Contains(IsoDayOfWeek.Saturday);
             set
             {
+                var executionDays = ((WeeklyBackupSchedule)_backupPlan.Schedule).ExecutionDays;
                 if (value)
                 {
-                    ((WeeklyBackupSchedule)_backupPlan.Schedule).ExecutionDays.Add(IsoDayOfWeek.Saturday);
+                    executionDays.Add(IsoDayOfWeek.Saturday);
                 }
-                else
+                else if (executionDays.Count > 1)
                 {
-                    ((WeeklyBackupSchedule)_backupPlan.Schedule).ExecutionDays.Remove(IsoDayOfWeek.Saturday);
+                    executionDays.Remove(IsoDayOfWeek.Saturday);
                 }
+                OnPropertyChanged(nameof(NextExecution));
                 OnPropertyChanged();
             }
         }
@@ -203,14 +226,16 @@ namespace ArchivePlanner.Planning
             get => _backupPlan.Schedule is WeeklyBackupSchedule plan && plan.ExecutionDays.Contains(IsoDayOfWeek.Sunday);
             set
             {
+                var executionDays = ((WeeklyBackupSchedule)_backupPlan.Schedule).ExecutionDays;
                 if (value)
                 {
-                    ((WeeklyBackupSchedule)_backupPlan.Schedule).ExecutionDays.Add(IsoDayOfWeek.Sunday);
+                    executionDays.Add(IsoDayOfWeek.Sunday);
                 }
-                else
+                else if (executionDays.Count > 1)
                 {
-                    ((WeeklyBackupSchedule)_backupPlan.Schedule).ExecutionDays.Remove(IsoDayOfWeek.Sunday);
+                    executionDays.Remove(IsoDayOfWeek.Sunday);
                 }
+                OnPropertyChanged(nameof(NextExecution));
                 OnPropertyChanged();
             }
         }
@@ -244,10 +269,11 @@ namespace ArchivePlanner.Planning
         public BackupPlan BackupPlan
         {
             get { return _backupPlan; }
-            set
+            private set
             {
                 _originalBackupPlan = value;
                 _backupPlan = (BackupPlan)value.Clone();
+                _backupPlan.Id = value.Id;
 
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(DestinationDirectory));
@@ -386,6 +412,7 @@ namespace ArchivePlanner.Planning
             OnPropertyChanged(nameof(IsFridayChecked));
             OnPropertyChanged(nameof(IsSaturdayChecked));
             OnPropertyChanged(nameof(IsSundayChecked));
+            OnPropertyChanged(nameof(NextExecution));
         }
 
         private IEnumerable<FileSystemEntryViewModel> GetSelectedFileSystemEntries(IEnumerable<FileSystemEntryViewModel?> entries)

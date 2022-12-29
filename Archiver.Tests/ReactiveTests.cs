@@ -6,6 +6,7 @@ using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -140,7 +141,7 @@ namespace Archiver.Tests
                             {
                                 _output.WriteLine($"Timer elapsed {p}");
                                 o.OnNext(p);
-                            }, _ => { },  () =>
+                            }, _ => { }, () =>
                             {
                                 o.OnCompleted();
                             });
@@ -154,6 +155,15 @@ namespace Archiver.Tests
                     .Repeat(3);
                 })
                 .Switch();
+        }
+
+        [Fact]
+        public async Task TestBehaviorSubject()
+        {
+            var subject = new BehaviorSubject<string>(null);
+            subject.Subscribe(s => _output.WriteLine("Event"));
+
+            subject.OnNext("test");
         }
     }
 }

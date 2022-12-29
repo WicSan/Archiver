@@ -32,7 +32,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ArchivePlanner\ArchivePlanner.csproj" />
+    <ProjectReference Include="..\Archiver\Archiver.csproj" />
     <ProjectReference Include="..\Shared\Shared.csproj" />
   </ItemGroup>
 

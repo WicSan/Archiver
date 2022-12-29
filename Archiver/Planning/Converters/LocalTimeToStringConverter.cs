@@ -9,7 +9,7 @@ namespace ArchivePlanner.Planning.Converters
     {
         public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return ((LocalDateTime?)value)?.ToString("dd.MM.yyyy", null) ?? "-";
+            return ((LocalDateTime?)value)?.ToString("f", null) ?? "-";
         }
 
         public override object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

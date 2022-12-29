@@ -8,7 +8,7 @@
              x:Name="userControl"
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
-        <local:PercentageConverter x:Key="PercentageConverter"/>
+        <local:DoubleToPercentageConverter x:Key="DoubleToPercentageConverter"/>
     </UserControl.Resources>
     <StackPanel>
         <Canvas x:Name="pathRoot">
@@ -34,7 +34,7 @@
                 </Path.Data>
             </Path>
             <TextBlock x:Name="text"
-                Text="{Binding Percentage, Converter={StaticResource PercentageConverter}, ElementName=userControl}"
+                Text="{Binding Percentage, Converter={StaticResource DoubleToPercentageConverter}, ElementName=userControl}"
                        Canvas.Top="{Binding TextTop, ElementName=userControl}"
                        Canvas.Left="{Binding TextLeft, ElementName=userControl}"
                        FontSize="24" FontWeight="Normal" FontFamily="Arial Black"/>

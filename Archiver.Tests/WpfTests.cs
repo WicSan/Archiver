@@ -4,6 +4,9 @@ using ArchivePlanner.Planning;
 using ArchivePlanner.Planning.Model;
 using ArchivePlanner.Util;
 using Moq;
+using NodaTime;
+using NodaTime.Testing;
+using System;
 using System.Collections.Generic;
 using System.Windows.Automation.Peers;
 
@@ -14,9 +17,10 @@ namespace Archiver.Tests
         [STAFact]
         public void ProgressAnimantionOnBackupStart()
         {
+            var fakeClock = new FakeClock(Instant.FromDateTimeOffset(new DateTimeOffset(2021, 11, 1, 7, 59, 59, TimeSpan.FromHours(1))));
             var ftpFactoryMock = new Mock<IFtpClientFactory>();
             var factoryMock = new Mock<IBackupPlanOverviewViewModelFactory>();
-            var viewModel = new BackupPlanOverviewViewModel(ftpFactoryMock.Object, new ProgressService());
+            var viewModel = new BackupPlanOverviewViewModel(ftpFactoryMock.Object, new ProgressService(), fakeClock, new BackupPlan());
             var repositoryMock = new Mock<IRepository<BackupPlan>>();
 
             factoryMock.Setup(f => f.CreateModel(It.IsAny<BackupPlan>())).Returns(viewModel);

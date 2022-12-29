@@ -147,7 +147,9 @@
             </TabControl>
             <TextBox Text="{Binding BackupPlan.Name}" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="20" Margin="8,6,0,0" TextWrapping="Wrap" Width="268" Height="34"/>
             <Label Content="Last execution:" HorizontalAlignment="Left" Margin="276,6,0,0" VerticalAlignment="Top" Height="17" Width="82" Foreground="Black" FontSize="11" Padding="5,0,5,0"/>
-            <Label Content="{Binding BackupPlan.Schedule.LastExecution, Converter={c:LocalDateTimeToStringConverter}}" HorizontalAlignment="Left" Margin="358,6,0,0" VerticalAlignment="Top" Height="17" Width="143" FontSize="11" Padding="5,0,5,0"/>
+            <Label Content="{Binding BackupPlan.Schedule.LastExecution, Converter={c:LocalDateTimeToStringConverter}}" HorizontalAlignment="Left" Margin="363,6,0,0" VerticalAlignment="Top" Height="17" Width="170" FontSize="11" Padding="5,0,5,0"/>
+            <Label Content="Next execution:" HorizontalAlignment="Left" Margin="276,24,0,0" VerticalAlignment="Top" Height="17" Width="87" Foreground="Black" FontSize="11" Padding="5,0,5,0"/>
+            <Label Content="{Binding NextExecution, Converter={c:LocalDateTimeToStringConverter}}" HorizontalAlignment="Left" Margin="363,24,0,0" VerticalAlignment="Top" Height="17" Width="170" FontSize="11" Padding="5,0,5,0"/>
         </Grid>
     </Grid>
 
