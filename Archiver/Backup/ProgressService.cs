@@ -19,5 +19,11 @@ namespace Archiver.Backup
             var prog = new BackupProgress(id, progress);
             _progressStream.OnNext(prog);
         }
+
+        public void Complete(Guid id)
+        {
+            var prog = new BackupProgress(id, TaskCompleted);
+            _progressStream.OnNext(prog);
+        }
     }
 }

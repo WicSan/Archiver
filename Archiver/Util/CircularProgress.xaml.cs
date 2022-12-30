@@ -133,6 +133,7 @@ namespace Archiver.Util
             var size = new Size(pathRoot.Width, pathRoot.Height);
             if(text.ActualWidth == 0 || text.ActualHeight == 0)
             {
+                //Measure on first render
                 Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
                 Arrange(new Rect(0, 0, pathRoot.DesiredSize.Width, pathRoot.DesiredSize.Height));
             }

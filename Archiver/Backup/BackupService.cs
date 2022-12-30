@@ -140,7 +140,7 @@ namespace Archiver.Backup
                     _logger.LogError("Failed to upload backup file with error {Error}", replay.ErrorMessage);
                 }
 
-                _service.ReportProgress(plan.Id, ProgressService.TaskCompleted);
+                _service.Complete(plan.Id);
             }
             catch (Exception e)
             {

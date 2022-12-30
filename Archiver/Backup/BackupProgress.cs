@@ -6,12 +6,12 @@ namespace Archiver.Backup
     {
         public Guid BackupId { get; private set; }
 
-        public double Progress { get; private set; }
+        public double Percentage { get; private set; }
 
         public BackupProgress(Guid id, double progress)
         {
             BackupId = id;
-            Progress = progress;
+            Percentage = progress;
         }
     }
 }

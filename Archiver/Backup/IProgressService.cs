@@ -8,5 +8,7 @@ namespace Archiver.Backup
         IObservable<BackupProgress?> BackupProgress { get; }
 
         void ReportProgress(Guid id, double progress);
+
+        void Complete(Guid id);
     }
 }

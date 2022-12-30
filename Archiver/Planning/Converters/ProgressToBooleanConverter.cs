@@ -11,7 +11,7 @@ namespace Archiver.Planning.Converters
         {
             Enum.TryParse(typeof(Conditional), (string?)parameter, out var conditionalType);
             var isInverted = (Conditional?)conditionalType == Conditional.Inverted;
-            var inProgress = (double)value == ProgressService.TaskCompleted ? false : true;
+            var inProgress = (BackupProgress)value is not null && ((BackupProgress)value).Percentage != ProgressService.TaskCompleted;
             return isInverted != inProgress;
         }
 

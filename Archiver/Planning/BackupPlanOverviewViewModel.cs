@@ -23,7 +23,7 @@ namespace Archiver.Planning
         private BackupPlan _backupPlan = null!;
         private BackupPlan _originalBackupPlan = null!;
         private IFtpClientFactory _ftpFactory;
-        private double _progress;
+        private BackupProgress? _progress;
         private readonly IProgressService _progressService;
         private readonly IClock _clock;
         private readonly IDisposable _progressSubscription;
@@ -33,8 +33,6 @@ namespace Archiver.Planning
 
         public BackupPlanOverviewViewModel(IFtpClientFactory ftpClientFactory, IProgressService progressService, IClock clock, BackupPlan? plan)
         {
-            _progress = ProgressService.TaskCompleted;
-
             LoadOverview();
 
             BackupPlan = plan ?? new BackupPlan();
@@ -43,7 +41,7 @@ namespace Archiver.Planning
             _clock = clock;
             _progressSubscription = _progressService.BackupProgress
                 .Where(p => p?.BackupId == _backupPlan!.Id)
-                .Subscribe(p => Progress = p!.Progress);
+                .Subscribe(p => Progress = p);
             
             RemoteFolders = new ObservableCollection<RemoteFolderViewModel>();
 
@@ -74,15 +72,18 @@ namespace Archiver.Planning
 
         public ObservableCollection<RemoteFolderViewModel> RemoteFolders { get; set; } = null!;
 
-        public double Progress
+        public BackupProgress? Progress
         {
             get => _progress;
             set
             {
                 _progress = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(ProgressPercentage));
             }
         }
+
+        public double ProgressPercentage => _progress?.Percentage ?? 0;
 
         public LocalDateTime NextExecution
         {
