@@ -277,6 +277,7 @@ namespace Archiver.Planning
                 _originalBackupPlan = value;
                 _backupPlan = (BackupPlan)value.Clone();
                 _backupPlan.Id = value.Id;
+                _backupPlan.Schedule.LastExecution = value.Schedule.LastExecution;
 
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(DestinationDirectory));
