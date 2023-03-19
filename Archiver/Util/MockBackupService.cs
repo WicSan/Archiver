@@ -26,15 +26,22 @@ namespace Archiver.Backup
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             var plan = await _repository.GetAllAsync().FirstOrDefaultAsync();
-            var progress = 0;
 
-            if(plan is not null)
+            if (plan is not null)
             {
-                Observable.Interval(new TimeSpan(0, 0, 2))
+                Observable.Timer(new TimeSpan(0, 0, 6))
                     .Subscribe(_ =>
                     {
                         _logger.LogInformation("Progress report");
-                        _service.ReportProgress(plan.Id, ++progress);
+                        _service.ReportProgress(plan.Id, 0.1);
+
+                        Thread.Sleep(2000);
+
+                        _service.ReportProgress(plan.Id, 1);
+
+                        Thread.Sleep(10000);
+
+                        _service.ReportProgress(plan.Id, ProgressService.TaskCompleted);
                     });
             }
         }

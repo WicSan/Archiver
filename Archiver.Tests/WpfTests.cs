@@ -1,5 +1,4 @@
-﻿using Archiver;
-using Archiver.Backup;
+﻿using Archiver.Backup;
 using Archiver.Planning;
 using Archiver.Planning.Model;
 using Archiver.Util;
@@ -25,7 +24,7 @@ namespace Archiver.Tests
 
             factoryMock.Setup(f => f.CreateModel(It.IsAny<BackupPlan>())).Returns(viewModel);
 
-            var mainViewModel = new MainViewModel(factoryMock.Object, repositoryMock.Object);
+            var mainViewModel = new MainViewModel(factoryMock.Object, repositoryMock.Object, new BackupPlanOverview());
             var window = new MainWindow(mainViewModel, new LoggerMock<MainWindow>());
             WindowAutomationPeer windowPeer = new WindowAutomationPeer(window);
             List<AutomationPeer> children = windowPeer.GetChildren();

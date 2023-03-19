@@ -13,16 +13,13 @@ namespace Archiver.Util
 
         private long _writtenBytes;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="stream"></param>
-        /// <param name="rate">Rate in kB/s</param>
-        public RateLimitedStream(Stream stream, int rate)
+        public RateLimitedStream(Stream stream, int networkUsagePercentage)
         {
             BaseStream = stream;
-            _rate = rate;
             _watch = new Stopwatch();
+
+            var currentNetworkSpeed = MainNetworkInterface.GetSpeedInKB();
+            _rate = Convert.ToInt32(currentNetworkSpeed * networkUsagePercentage / 100);
         }
 
         public int Rate => _rate;

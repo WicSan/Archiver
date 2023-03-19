@@ -1,4 +1,5 @@
-﻿using Archiver.Planning.Database;
+﻿using Archiver.Backup;
+using Archiver.Planning.Database;
 using NodaTime;
 using System;
 using System.Collections.Generic;
@@ -40,22 +41,35 @@ namespace Archiver.Planning.Model
             Connection = (FtpConnection)plan.Connection.Clone();
         }
 
+        [JsonIgnore]
         public string FullName
         {
             get
             {
                 var timestamp = SystemClock.Instance.GetCurrentInstant().ToString("yyyy-MM-dd-HH-mm-ss", null);
                 var backupFileName = $"{Name}_{timestamp}";
-                var backupFullName = $"{DestinationFolder}/{backupFileName}";
+                return $"{DestinationFolder}/{backupFileName}";
+            }
+        }
 
-                if (backupFullName.StartsWith("/"))
+        public string? PreviousFullName
+        {
+            get
+            {
+                if(Schedule.LastExecution is null)
                 {
-                    backupFullName = backupFullName.Remove(0, 1);
+                    return null;
                 }
-                
+
+                var timestamp = Schedule.LastExecution?.ToString("yyyy-MM-dd-HH-mm-ss", null);
+                var backupFileName = $"{Name}_{timestamp}";
+                var backupFullName = $"{DestinationFolder}/{backupFileName}.zip";
+
                 return backupFullName;
             }
         }
+
+        public IBackupEngine BackupEngine => new FullBackupEngine();
 
         public override bool Equals(object? obj) => this.Equals(obj as BackupPlan);
 

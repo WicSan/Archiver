@@ -4,16 +4,15 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Security;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
-using Archiver.Backup;
 using Archiver.Planning.Model;
 using Archiver.Util;
 using Archiver.Shared;
 using FluentFTP;
 using NodaTime;
+using Archiver.Backup;
 
 namespace Archiver.Planning
 {

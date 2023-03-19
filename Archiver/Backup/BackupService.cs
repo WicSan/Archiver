@@ -1,6 +1,7 @@
 using Archiver.Planning;
 using Archiver.Planning.Model;
 using Archiver.Util;
+using FluentFTP;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NodaTime;
@@ -71,7 +72,7 @@ namespace Archiver.Backup
                 {
                     return Observable.Create<BackupPlan>(o =>
                     {
-                        var now = _clock.GetCurrentInstant().ToLocalDateTime();
+                        var now = _clock.GetCurrentInstant().ToLocalDateTime().With(d => d.PlusDays(-2));
                         var next = plan.Schedule.NextExecution(now);
                         var delay = (next - now).ToDuration().ToTimeSpan();
 
@@ -98,47 +99,14 @@ namespace Archiver.Backup
             {
                 await client.ConnectAsync(3, _externalToken);
 
-                var currentNetworkSpeed = MainNetworkInterface.GetSpeedInKB();
-                var targetUploadSpeed = Convert.ToInt32(currentNetworkSpeed - currentNetworkSpeed * 0.3);
-                var fullName = $"/{plan.FullName}.zip";
+                IEnumerable<ZipArchiveEntry> archiveEntries = await GetBackedUpFiles(client, plan);
 
-                _logger.LogDebug("Plan {Name} started at {StartDateTime} with file name {FullName}", plan.Name, DateTime.Now, fullName);
+                _logger.LogDebug("Plan {Name} started at {StartDateTime} with file name {FullName}", plan.Name, DateTime.Now, plan.FullName);
 
-                using (var uploadStream = await client.OpenWriteAsync(fullName, FluentFTP.FtpDataType.Binary, false, _externalToken))
-                using (var limitedStream = new RateLimitedStream(uploadStream, targetUploadSpeed))
-                using (var gzipStream = new GZipStream(limitedStream, CompressionLevel.Fastest))
-                {
-                    var progress = 0.0;
-                    var files = GetFilesToBackup(plan).ToList();
-                    var totalFiles = files.Count();
-                    foreach (var file in files)
-                    {
-                        if (_externalToken.IsCancellationRequested)
-                        {
-                            _logger.LogInformation("Backup aborted.");
-                            return;
-                        }
+                var filesToBackup = plan.BackupEngine.GetFilesToBackup(archiveEntries, GetLocalFiles(plan)).ToList();
+                await BackupFiles(client, plan, filesToBackup, _externalToken);
 
-                        using var fileStream = file.OpenRead();
-                        fileStream.CopyTo(gzipStream);
-
-                        progress += 1.0 / totalFiles;
-                        _service.ReportProgress(plan.Id, progress);
-                    }
-                }
-
-                var replay = client.GetReply();
-                if (replay.Success)
-                {
-                    _logger.LogInformation("Backup plan {Name} execution successfull.", plan.Name);
-
-                    plan.Schedule.LastExecution = _clock.GetCurrentInstant().ToLocalDateTime();
-                    await _repository.UpsertAsync(plan, _externalToken);
-                }
-                else
-                {
-                    _logger.LogError("Failed to upload backup file with error {Error}", replay.ErrorMessage);
-                }
+                await UpdateBackupPlanOnSuccessAsync(client, plan);
 
                 _service.Complete(plan.Id);
             }
@@ -152,7 +120,57 @@ namespace Archiver.Backup
             }
         }
 
-        private IEnumerable<FileInfo> GetFilesToBackup(BackupPlan plan)
+        private async Task<IEnumerable<ZipArchiveEntry>> GetBackedUpFiles(FtpClient client, BackupPlan plan)
+        {
+            var backedUpEntries = Enumerable.Empty<ZipArchiveEntry>();
+            if (plan.PreviousFullName is not null)
+            {
+                using (var stream = new SeekableFtpFileStream(client, plan.PreviousFullName))
+                using (var zipArchive = new ZipArchive(stream, ZipArchiveMode.Read))
+                {
+                    backedUpEntries = zipArchive.Entries;
+                }
+            }
+
+            return backedUpEntries;
+        }
+
+        private async Task BackupFiles(FtpClient client, BackupPlan plan, List<FileInfo> filesToBackup, CancellationToken cancellationToken)
+        {
+            if (!filesToBackup.Any())
+            {
+                return;
+            }
+
+            var fullName = $"{plan.FullName}.zip";
+            using (var uploadStream = await client.OpenWriteAsync(fullName, FtpDataType.Binary, false, _externalToken))
+            using (var limitedStream = new RateLimitedStream(uploadStream, 80))
+            using (var archive = new ZipArchive(limitedStream, ZipArchiveMode.Create, false))
+            {
+                var progress = 0.0;
+                var totalFiles = filesToBackup.Count();
+                foreach (var file in filesToBackup)
+                {
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        _logger.LogInformation("Backup aborted.");
+                        return;
+                    }
+
+                    var entry = archive.CreateEntry(file.FullName, CompressionLevel.Fastest);
+                    using (var entryStream = entry.Open())
+                    using (var fileStream = file.OpenRead())
+                    {
+                        fileStream.CopyTo(entryStream);
+                    }
+
+                    progress += 1.0 / totalFiles;
+                    _service.ReportProgress(plan.Id, progress);
+                }
+            }
+        }
+
+        private IEnumerable<FileInfo> GetLocalFiles(BackupPlan plan)
         {
             var options = new EnumerationOptions
             {
@@ -173,6 +191,22 @@ namespace Archiver.Backup
             foreach (var file in files)
             {
                 yield return file;
+            }
+        }
+
+        private async Task UpdateBackupPlanOnSuccessAsync(FtpClient client, BackupPlan plan)
+        {
+            var replay = client.GetReply();
+            if (replay.Success)
+            {
+                _logger.LogInformation("Backup plan {Name} execution successfull.", plan.Name);
+
+                plan.Schedule.LastExecution = _clock.GetCurrentInstant().ToLocalDateTime();
+                await _repository.UpsertAsync(plan, _externalToken);
+            }
+            else
+            {
+                _logger.LogError("Failed to upload backup file with error {Error}", replay.ErrorMessage);
             }
         }
 

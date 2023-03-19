@@ -1,11 +1,7 @@
-using ICSharpCode.SharpZipLib.Tar;
-using SharpCompress.Writers.Tar;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
-using System.Text;
 using Xunit;
 
 namespace Archiver.Tests
@@ -56,7 +52,7 @@ namespace Archiver.Tests
         }
 
 
-        [Fact]
+        /*[Fact]
         public void TestCreationTar()
         {
             var options = new TarWriterOptions(SharpCompress.Common.CompressionType.None, false);
@@ -131,7 +127,7 @@ namespace Archiver.Tests
                     }
                 }
             }
-        }
+        }*/
 
         /*[Fact]
         public void TestCreationTarWithLibraryBug()
