@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Archiver.Backup
+namespace Archiver.Backup.Model
 {
     public class BackupProgress
     {

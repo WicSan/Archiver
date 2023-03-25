@@ -35,7 +35,7 @@ namespace Archiver.Tests
                 Name = "Local backup",
                 DestinationFolder = "/Backup/sandro",
                 Schedule = new WeeklyBackupSchedule(new LocalTime(8, 00), new HashSet<IsoDayOfWeek> { IsoDayOfWeek.Monday }) { LastExecution = new LocalDateTime() },
-                Connection = new FtpConnection("192.168.1.4", "sandro", GetEncryptedBase64EncodedString("test")),
+                Connection = new FtpConnectionDetails("192.168.1.4", "sandro", GetEncryptedBase64EncodedString("test")),
                 FileSystemItems = new List<FileSystemInfo>
                 {
                     new FileInfo("test")
@@ -68,7 +68,7 @@ namespace Archiver.Tests
                 Id = Guid.NewGuid(),
                 Name = "test",
                 DestinationFolder = "Backup/sandro",
-                Connection = new FtpConnection("192.168.1.4", "sandro", GetEncryptedBase64EncodedString("test")),
+                Connection = new FtpConnectionDetails("192.168.1.4", "sandro", GetEncryptedBase64EncodedString("test")),
                 Schedule = new WeeklyBackupSchedule(new LocalTime(8, 0), new List<IsoDayOfWeek> { IsoDayOfWeek.Monday }),
                 FileSystemItems = new List<FileSystemInfo>
                 {

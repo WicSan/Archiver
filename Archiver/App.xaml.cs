@@ -70,8 +70,8 @@ namespace Archiver
             services.AddSingleton<JsonDatabase>();
 
             services.AddSingleton<IRepository<BackupPlan>, PlanningRepository>();
-
-            services.AddHostedService<BackupService>();
+            services.AddTransient<BackupServiceFactory>();
+            services.AddHostedService<BackupScheduler>();
 
             services.AddSingleton<IClock>(c => SystemClock.Instance);
             services.AddSingleton(_notifyIcon);

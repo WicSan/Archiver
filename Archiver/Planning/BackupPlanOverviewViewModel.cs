@@ -13,6 +13,7 @@ using Archiver.Shared;
 using FluentFTP;
 using NodaTime;
 using Archiver.Backup;
+using Archiver.Backup.Model;
 
 namespace Archiver.Planning
 {

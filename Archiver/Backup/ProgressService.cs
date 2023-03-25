@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Archiver.Backup.Model;
+using System;
 using System.Reactive.Subjects;
 
 namespace Archiver.Backup

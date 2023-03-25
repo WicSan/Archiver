@@ -9,7 +9,7 @@ namespace Archiver.Util
 {
     public static class FtpClientExtensions
     {
-        public static async Task ConnectAsync(this FtpClient client, int retryAttempts = 1, CancellationToken token = default)
+        public static async Task ConnectAsync(this IFtpClient client, int retryAttempts = 1, CancellationToken token = default)
         {
             await Observable
                 .FromAsync(() => client.ConnectAsync(token))

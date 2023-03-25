@@ -5,6 +5,6 @@ namespace Archiver.Planning
 {
     public interface IFtpClientFactory
     {
-        FtpClient CreateFtpClient(FtpConnection connection);
+        IFtpClient CreateFtpClient(FtpConnectionDetails connection);
     }
 }

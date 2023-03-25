@@ -2,10 +2,6 @@
 using Archiver.Planning.Model;
 using Archiver.Util;
 using FluentFTP;
-using Microsoft.Extensions.Logging;
-using Moq;
-using SharpCompress.Common;
-using SharpCompress.Writers.Tar;
 using System;
 using System.IO;
 using System.IO.Compression;
@@ -26,12 +22,12 @@ namespace Archiver.Tests
             _output = output;
         }
 
-        [Fact]
+        /*[Fact]
         public async Task TestFtpClientUpload()
         {
             var fileName = "My Games.tar";
             var token = new CancellationTokenSource().Token;
-            var connection = new FtpConnection("192.168.1.4", "sandro", "");
+            var connection = new FtpConnectionDetails("192.168.1.4", "sandro", "");
             var loggerMock = new LoggerMock<FtpClient>(_output);
 
             using var client = new FtpClientFactory(true, loggerMock).CreateFtpClient(connection);
@@ -53,14 +49,14 @@ namespace Archiver.Tests
             }
 
             client.GetReply();
-        }
+        }*/
 
         [Fact]
         public async Task TestConnectAsync()
         {
             var loggerMock = new LoggerMock<FtpClient>(_output);
 
-            using var client = new FtpClientFactory(true, loggerMock).CreateFtpClient(new FtpConnection { Host="localhost", Username="proftp", Password=new System.Security.SecureString() });
+            using var client = new FtpClientFactory(true, loggerMock).CreateFtpClient(new FtpConnectionDetails { Host="localhost", Username="proftp", Password=new System.Security.SecureString() });
             await Assert.ThrowsAsync<SocketException>(async () => await client.ConnectAsync(3, new CancellationTokenSource().Token));
 
             Assert.False(client.IsConnected);

@@ -5,16 +5,16 @@ using System.Text.Json.Serialization;
 
 namespace Archiver.Planning.Model
 {
-    public class FtpConnection : ICloneable
+    public class FtpConnectionDetails : ICloneable
     {
         private string? _password;
 
-        public FtpConnection()
+        public FtpConnectionDetails()
         {
         }
 
         [JsonConstructor]
-        public FtpConnection(string host, string username, string? ecryptedPassword)
+        public FtpConnectionDetails(string host, string username, string? ecryptedPassword)
         {
             Host = host;
             Username = username;
@@ -62,7 +62,7 @@ namespace Archiver.Planning.Model
 
         public object Clone()
         {
-            return new FtpConnection(Host, Username, EcryptedPassword);
+            return new FtpConnectionDetails(Host, Username, EcryptedPassword);
         }
     }
 }

@@ -15,7 +15,7 @@ namespace Archiver.Planning.Model
 
         public string Name { get; set; } = null!;
 
-        public FtpConnection Connection { get; set; }
+        public FtpConnectionDetails Connection { get; set; }
 
         public string DestinationFolder { get; set; } = null!;
 
@@ -28,7 +28,7 @@ namespace Archiver.Planning.Model
 
         public BackupPlan()
         {
-            Connection = new FtpConnection();
+            Connection = new FtpConnectionDetails();
             Schedule = new DailyBackupSchedule(LocalTime.Noon);
         }
 
@@ -38,7 +38,7 @@ namespace Archiver.Planning.Model
             DestinationFolder = plan.DestinationFolder;
             FileSystemItems = plan.FileSystemItems;
             Schedule = (BackupSchedule)plan.Schedule.Clone();
-            Connection = (FtpConnection)plan.Connection.Clone();
+            Connection = (FtpConnectionDetails)plan.Connection.Clone();
         }
 
         [JsonIgnore]
@@ -69,7 +69,7 @@ namespace Archiver.Planning.Model
             }
         }
 
-        public IBackupEngine BackupEngine => new FullBackupEngine();
+        public BackupType BackupType => BackupType.Differential;
 
         public override bool Equals(object? obj) => this.Equals(obj as BackupPlan);
 
@@ -93,5 +93,7 @@ namespace Archiver.Planning.Model
         {
             return new BackupPlan(this);
         }
+
+
     }
 }

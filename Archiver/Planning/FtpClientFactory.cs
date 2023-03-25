@@ -20,7 +20,7 @@ namespace Archiver.Planning
             _logger = logger;
         }
 
-        public FtpClient CreateFtpClient(FtpConnection connection)
+        public IFtpClient CreateFtpClient(FtpConnectionDetails connection)
         {
             if (connection.Host is null || connection.Username is null || connection.Password is null)
             {

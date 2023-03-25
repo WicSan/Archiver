@@ -13,12 +13,12 @@ namespace Archiver.Backup
         // Pointing to the current reading position on the stream
         private long _cursor;
 
-        private readonly FtpClient _ftpClient;
+        private readonly IFtpClient _ftpClient;
         private readonly string _fullName;
 
         private Stream? _stream;
 
-        public SeekableFtpFileStream(FtpClient ftpClient, string fullName)
+        public SeekableFtpFileStream(IFtpClient ftpClient, string fullName)
         {
             _ftpClient = ftpClient;
             _fullName = fullName;

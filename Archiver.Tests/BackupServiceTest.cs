@@ -45,7 +45,7 @@ namespace Archiver.Tests
             {
                 Name = "test",
                 DestinationFolder = "Backup/sandro",
-                Connection = new FtpConnection("192.168.1.4", "sandro",
+                Connection = new FtpConnectionDetails("192.168.1.4", "sandro",
                     ""),
                 Schedule = new WeeklyBackupSchedule(new LocalTime(8, 0), new List<IsoDayOfWeek> { IsoDayOfWeek.Monday }),
                 FileSystemItems = new List<FileSystemInfo>
@@ -60,13 +60,14 @@ namespace Archiver.Tests
 
             var updateObserver = new BehaviorSubject<Unit>(Unit.Default);
             repositoryMock.Setup(r => r.UpsertAsync(It.IsAny<BackupPlan>(), It.IsAny<CancellationToken>())).Callback(() => updateObserver.OnCompleted());
-            var loggerMock = new LoggerMock<BackupService>(_output);
+            var loggerMock = new LoggerMock<BackupScheduler>(_output);
 
-            var subject = new BackupService(
+            var subject = new BackupScheduler(
                 repositoryMock.Object,
                 fakeClock,
-                new Mock<IProgressService>().Object,
-                new FtpClientFactory(false, new Mock<ILogger<FtpClient>>().Object),
+                new BackupServiceFactory(new Mock<IProgressService>().Object,
+                                         new FtpClientFactory(false, new Mock<ILogger<FtpClient>>().Object),
+                                         new LoggerMock<BaseBackupService>(_output)),
                 loggerMock);
 
             await subject.StartAsync(new CancellationTokenSource().Token);
@@ -101,11 +102,12 @@ namespace Archiver.Tests
             var repositoryMock = new Mock<IRepository<BackupPlan>>();
             repositoryMock.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>())).Returns(() => new List<BackupPlan> { plan });
             var fakeClock = new FakeClock(Instant.FromDateTimeOffset(new DateTimeOffset(2021, 11, 1, 7, 59, 59, TimeSpan.FromHours(1))));
-            var subject = new BackupService(
+            var subject = new BackupScheduler(
                 repositoryMock.Object, fakeClock,
-                new Mock<ProgressService>().Object,
-                new FtpClientFactory(false, new Mock<ILogger<FtpClient>>().Object),
-                new Mock<ILogger<BackupService>>().Object);
+                new BackupServiceFactory(new Mock<IProgressService>().Object,
+                                         new FtpClientFactory(false, new Mock<ILogger<FtpClient>>().Object),
+                                         new LoggerMock<BaseBackupService>(_output)),
+                new Mock<ILogger<BackupScheduler>>().Object);
             CancellationTokenSource source = new CancellationTokenSource();
 
             await subject.StartAsync(source.Token);
@@ -149,6 +151,44 @@ namespace Archiver.Tests
                 });
 
             Thread.Sleep(10000);
+        }
+
+        [Fact]
+        public async Task TestFileWriteTimeConversion()
+        {
+            var plan = new BackupPlan()
+            {
+                Name = "test",
+                DestinationFolder = "\\test",
+                Schedule = new WeeklyBackupSchedule(new LocalTime(8, 00), new List<IsoDayOfWeek> { IsoDayOfWeek.Monday }),
+                FileSystemItems = new List<FileSystemInfo>
+                {
+                    new DirectoryInfo(@"D:\data\documents\Archiv"),
+                },
+            };
+            var repositoryMock = new Mock<IRepository<BackupPlan>>();
+            repositoryMock.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>())).Returns(() => new List<BackupPlan> { plan }.ToAsyncEnumerable());
+
+            var ftpClientFactoryMock = new Mock<IFtpClientFactory>();
+            var ftpClientMock = new Mock<IFtpClient>();
+            ftpClientFactoryMock.Setup(f => f.CreateFtpClient(It.IsAny<FtpConnectionDetails>())).Returns(() => ftpClientMock.Object);
+            ftpClientMock.Setup(f => f.GetListing(It.IsAny<string>())).Returns(() => Array.Empty<FtpListItem>());
+            ftpClientMock
+                .Setup(f => f.OpenWriteAsync(It.IsAny<string>(), It.IsAny<FtpDataType>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+                .Returns(() => Task.FromResult((Stream)new MemoryStream()));
+
+            var fakeClock = new FakeClock(Instant.FromDateTimeOffset(new DateTimeOffset(2021, 11, 1, 7, 59, 59, TimeSpan.FromHours(1))));
+            var subject = new BackupScheduler(
+                repositoryMock.Object, fakeClock,
+                new BackupServiceFactory(new Mock<IProgressService>().Object,
+                                         ftpClientFactoryMock.Object,
+                                         new LoggerMock<BaseBackupService>(_output)),
+                new Mock<ILogger<BackupScheduler>>().Object);
+            CancellationTokenSource source = new CancellationTokenSource();
+            
+            await subject.StartAsync(source.Token);
+
+            Thread.Sleep(2000);
         }
 
         private IObservable<int> Schedule(int i)

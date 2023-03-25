@@ -14,9 +14,9 @@ namespace Archiver.Backup
     {
         private readonly IRepository<BackupPlan> _repository;
         private readonly IProgressService _service;
-        private readonly ILogger<BackupService> _logger;
+        private readonly ILogger<BackupScheduler> _logger;
 
-        public MockBackupService(IRepository<BackupPlan> repository, IProgressService service, ILogger<BackupService> logger)
+        public MockBackupService(IRepository<BackupPlan> repository, IProgressService service, ILogger<BackupScheduler> logger)
         {
             _repository = repository;
             _service = service;

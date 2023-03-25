@@ -1,4 +1,5 @@
 ﻿using Archiver.Backup;
+using Archiver.Backup.Model;
 using Archiver.Util;
 using System;
 using System.Globalization;
