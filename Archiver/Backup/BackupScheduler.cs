@@ -71,7 +71,7 @@ namespace Archiver.Backup
                 {
                     return Observable.Create<BackupPlan>(o =>
                     {
-                        var now = _clock.GetCurrentInstant().ToLocalDateTime().With(d => d.PlusDays(-2));
+                        var now = _clock.GetCurrentInstant().ToLocalDateTime();
                         var next = plan.Schedule.NextExecution(now);
                         var delay = (next - now).ToDuration().ToTimeSpan();
 
