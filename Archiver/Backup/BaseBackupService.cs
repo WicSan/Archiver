@@ -11,7 +11,6 @@ using System.IO.Compression;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using static NodaTime.Extensions.DateTimeExtensions;
 
 namespace Archiver.Backup
 {
@@ -122,18 +121,7 @@ namespace Archiver.Backup
                         return false;
                     }
 
-                    var entry = archive.CreateEntry(file.FullName, CompressionLevel.Fastest);
-                    var offset = file.LastWriteTime.ToLocalDateTime() - file.LastWriteTimeUtc.ToLocalDateTime();
-                    entry.LastWriteTime = file.LastWriteTime
-                        .ToLocalDateTime()
-                        .InZoneStrictly(DateTimeZone.ForOffset(Offset.FromHours((int)offset.Hours)))
-                        .ToDateTimeOffset();
-
-                    using (var entryStream = entry.Open())
-                    using (var fileStream = file.OpenRead())
-                    {
-                        fileStream.CopyTo(entryStream);
-                    }
+                    archive.AddEntry(file);
 
                     progress += 1.0 / totalFiles;
                     _service.ReportProgress(plan.Id, progress);
