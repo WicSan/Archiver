@@ -9,8 +9,6 @@
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
-        <uc:CircularProgress HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding Progress, Converter={c:ProgressToVisibilityConverter}}"
-            Percentage="{Binding ProgressPercentage}" StrokeThickness="20" Radius="80" Color="{DynamicResource Primary}" Panel.ZIndex="5" />
         <Grid IsEnabled="{Binding Progress, ConverterParameter=Inverted, Converter={c:ProgressToBooleanConverter}}" Panel.ZIndex="1" Effect="{Binding Progress, Converter={c:ProgressToBlurConverter}}" Margin="0,10,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
@@ -144,6 +142,31 @@
                         </GroupBox>
                     </Grid>
                 </TabItem>
+                <TabItem HorizontalAlignment="Center" Height="37" Header="Restore" VerticalAlignment="Center" Width="110" FontSize="14">
+                    <Grid Background="White">
+                        <Button Grid.Row="0" x:Name="RestoreAll" Command="{Binding RestoreAllCommand}" IsEnabled="{Binding IsSaveEnabled}" Content="Restore All" Margin="667,10,0,0" HorizontalAlignment="Left" Width="108" Height="34" VerticalAlignment="Top" RenderTransformOrigin="0.539,0.644"/>
+                        <TextBox Text="{Binding RestoreDestination}" HorizontalAlignment="Left" VerticalAlignment="Top" VerticalContentAlignment="Center" Margin="114,68,0,0" TextWrapping="Wrap" Width="548" Height="34"/>
+                        <Button Grid.Row="0" x:Name="Select_Destination" Command="{Binding SelectDestinationCommand}" IsEnabled="{Binding IsSaveEnabled}" Content="..." Margin="667,68,0,0" HorizontalAlignment="Left" Width="44" Height="34" VerticalAlignment="Top" RenderTransformOrigin="0.515,0.552"/>
+                        <Label FontSize="14" Content="Destination" HorizontalAlignment="Left" Margin="24,71,0,0" VerticalAlignment="Top" Width="85"/>
+                        <Button Grid.Row="0" x:Name="Restore" Command="{Binding RestoreCommand}" IsEnabled="{Binding IsSaveEnabled}" Content="Restore" Margin="554,10,0,0" HorizontalAlignment="Left" Width="108" Height="34" VerticalAlignment="Top" RenderTransformOrigin="0.539,0.644"/>
+                        <ListView Grid.Row="0" Grid.Column="0" x:Name="Archived_Items" ItemsSource="{Binding ArchivedItems}"
+                            Margin="24,0,85,19" VerticalContentAlignment="Center" SelectionMode="Single" MinHeight="200" MinWidth="525" Height="141" VerticalAlignment="Bottom">
+                            <ListView.View>
+                                <GridView>
+                                    <GridViewColumn Header="" Width="30">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <CheckBox IsChecked="{Binding IsChecked, Mode=TwoWay}"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                    <GridViewColumn DisplayMemberBinding="{Binding Name}" Header="Name" Width="150"/>
+                                    <GridViewColumn DisplayMemberBinding="{Binding SourcePath}" Header="Path" Width="300"/>
+                                </GridView>
+                            </ListView.View>
+                        </ListView>
+                    </Grid>
+                </TabItem>
             </TabControl>
             <TextBox Text="{Binding BackupPlan.Name}" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="20" Margin="8,6,0,0" TextWrapping="Wrap" Width="268" Height="34"/>
             <Label Content="Last execution:" HorizontalAlignment="Left" Margin="276,6,0,0" VerticalAlignment="Top" Height="17" Width="82" Foreground="Black" FontSize="11" Padding="5,0,5,0"/>
@@ -151,6 +174,9 @@
             <Label Content="Next execution:" HorizontalAlignment="Left" Margin="276,24,0,0" VerticalAlignment="Top" Height="17" Width="87" Foreground="Black" FontSize="11" Padding="5,0,5,0"/>
             <Label Content="{Binding NextExecution, Converter={c:LocalDateTimeToStringConverter}}" HorizontalAlignment="Left" Margin="363,24,0,0" VerticalAlignment="Top" Height="17" Width="170" FontSize="11" Padding="5,0,5,0"/>
         </Grid>
+        <TextBox HorizontalAlignment="Center" Margin="0,159,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="120"/>
+        <uc:CircularProgress HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding Progress, Converter={c:ProgressToVisibilityConverter}}"
+            Percentage="{Binding ProgressPercentage}" StrokeThickness="20" Radius="80" Color="{DynamicResource Primary}" Panel.ZIndex="5" d:IsHidden="True" />
     </Grid>
 
 </UserControl>

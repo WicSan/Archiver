@@ -1,7 +1,6 @@
 ﻿using Archiver.Planning;
 using Archiver.Planning.Model;
 using Microsoft.Extensions.Logging;
-using NodaTime;
 using System;
 
 namespace Archiver.Backup
@@ -11,6 +10,10 @@ namespace Archiver.Backup
         private IProgressService _service;
         private IFtpClientFactory _ftpClientFactory;
         private ILogger<BaseBackupService> _logger;
+
+        public BackupServiceFactory()
+        {
+        }
 
         public BackupServiceFactory(IProgressService service, IFtpClientFactory ftpClientFactory, ILogger<BaseBackupService> logger)
         {

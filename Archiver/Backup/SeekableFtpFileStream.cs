@@ -1,44 +1,47 @@
 ﻿using FluentFTP;
 using System;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Archiver.Backup
 {
     public class SeekableFtpFileStream : Stream, IDisposable
     {
-        private readonly long _length;
+        private long _length;
 
         // Current position, used to move cursor to the right position
         private long _position;
         // Pointing to the current reading position on the stream
         private long _cursor;
 
-        private readonly IFtpClient _ftpClient;
+        private readonly IAsyncFtpClient _ftpClient;
         private readonly string _fullName;
 
         private Stream? _stream;
 
-        public SeekableFtpFileStream(IFtpClient ftpClient, string fullName)
+        public SeekableFtpFileStream(IAsyncFtpClient client, string fullName)
         {
-            _ftpClient = ftpClient;
+            _ftpClient = client;
             _fullName = fullName;
-
-            _length = _ftpClient.GetFileSize(_fullName);
             _stream = null;
             _cursor = 0;
             _position = 0;
+            _length = -1;
         }
 
         /// <summary>
         /// Close, dispose and nullify _stream and _response
         /// </summary>
-        private void CloseConnection()
+        private void CloseStreamingConnection()
         {
             // Clean up stream if exists
             if (_stream != null)
             {
+                _stream.Close();
                 _stream.Dispose();
                 _stream = null;
+
+                var re = Task.Run(() => _ftpClient.GetReply()).GetAwaiter().GetResult();
             }
         }
 
@@ -49,7 +52,7 @@ namespace Archiver.Backup
         {
             get
             {
-                return (Position < Length);
+                return Position < Length;
             }
         }
 
@@ -80,7 +83,11 @@ namespace Archiver.Backup
         /// </summary>
         public override long Length
         {
-            get { return _length; }
+            get
+            {
+                InitializeLength();
+                return _length;
+            }
         }
 
 
@@ -117,15 +124,11 @@ namespace Archiver.Backup
         /// <returns>Bytes read count</returns>
         public override int Read(byte[] buffer, int offset, int count)
         {
+            InitializeLength();
             if (_cursor > _position || _stream == null)
             {
-                _stream?.Dispose();
-                _stream = _ftpClient.OpenRead(_fullName, FtpDataType.Binary, _position);
-                FtpReply status = _ftpClient.GetReply();
-                if (!status.Success)
-                {
-                    throw new Exception(status.Message);
-                }
+                CloseStreamingConnection();
+                _stream = Task.Run(async () => await _ftpClient.OpenRead(_fullName, FtpDataType.Binary, _position, Length)).GetAwaiter().GetResult();
 
                 _cursor = _position;
             }
@@ -155,6 +158,7 @@ namespace Archiver.Backup
         /// <returns>Position on stream</returns>
         public override long Seek(long offset, SeekOrigin origin)
         {
+            InitializeLength();
             switch (origin)
             {
                 case SeekOrigin.Begin:
@@ -186,6 +190,14 @@ namespace Archiver.Backup
             return _position;
         }
 
+        private void InitializeLength()
+        {
+            if(_length == -1)
+            {
+                _length = Task.Run(() => _ftpClient.GetFileSize(_fullName)).GetAwaiter().GetResult();
+            }
+        }
+
         /// <summary>
         /// Always throws NotSupportedException
         /// </summary>
@@ -211,7 +223,7 @@ namespace Archiver.Backup
         /// </summary>
         public new void Dispose()
         {
-            CloseConnection();
+            CloseStreamingConnection();
         }
     }
 }

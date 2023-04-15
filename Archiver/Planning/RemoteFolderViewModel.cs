@@ -50,10 +50,10 @@ namespace Archiver.Planning
         private async Task LoadChildrenAsync()
         {
             using var client = _clientFactory.CreateFtpClient(_parentViewModel.BackupPlan.Connection);
-            await client.ConnectAsync();
-            foreach (var item in await client.GetListingAsync(_item.FullName))
+            await client.Connect();
+            foreach (var item in await client.GetListing(_item.FullName))
             {
-                if (item.Type == FtpFileSystemObjectType.Directory)
+                if (item.Type == FtpObjectType.Directory)
                 {
                     Children.Add(new RemoteFolderViewModel(item, _clientFactory, _parentViewModel));
                 }

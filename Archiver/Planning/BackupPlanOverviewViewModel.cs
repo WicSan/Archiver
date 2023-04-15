@@ -14,6 +14,8 @@ using FluentFTP;
 using NodaTime;
 using Archiver.Backup;
 using Archiver.Backup.Model;
+using System.Threading;
+using System.Windows.Threading;
 
 namespace Archiver.Planning
 {
@@ -23,27 +25,27 @@ namespace Archiver.Planning
         private BackupPlan _backupPlan = null!;
         private BackupPlan _originalBackupPlan = null!;
         private IFtpClientFactory _ftpFactory;
+        private readonly BackupServiceFactory _backupServiceFactory;
         private BackupProgress? _progress;
         private readonly IProgressService _progressService;
         private readonly IClock _clock;
         private readonly IDisposable _progressSubscription;
+        private Dispatcher _dispatcher;
+        private string? _restoreDestination;
 
         public event EventHandler<BackupPlan>? OnSavePlan;
         public event EventHandler? OnCancel;
 
-        public BackupPlanOverviewViewModel(IFtpClientFactory ftpClientFactory, IProgressService progressService, IClock clock, BackupPlan? plan)
+        public BackupPlanOverviewViewModel(IFtpClientFactory ftpClientFactory, BackupServiceFactory backupServiceFactory, IProgressService progressService, IClock clock, BackupPlan? plan)
         {
-            LoadOverview();
-
-            BackupPlan = plan ?? new BackupPlan();
             _ftpFactory = ftpClientFactory;
+            _backupServiceFactory = backupServiceFactory;
             _progressService = progressService;
             _clock = clock;
-            _progressSubscription = _progressService.BackupProgress
-                .Where(p => p?.BackupId == _backupPlan!.Id)
-                .Subscribe(p => Progress = p);
-            
+            _dispatcher = Dispatcher.CurrentDispatcher;
+
             RemoteFolders = new ObservableCollection<RemoteFolderViewModel>();
+            ArchivedItems = new ObservableCollection<ArchivedItemViewModel>();
 
             BrowseCommand = new RelayCommand(BrowseDirectories);
             RefreshCommand = new AsyncCommand(RefreshRemoteFolders);
@@ -52,6 +54,14 @@ namespace Archiver.Planning
             CancelCommand = new RelayCommand(Cancel);
             CheckConnectionCommand = new AsyncCommand(CheckConnection);
             ChangeTypeCommand = new RelayCommand<Type>(ChangeScheduleType);
+            RestoreCommand = new AsyncCommand(RestorePlan);
+            RestoreAllCommand = new AsyncCommand(RestoreAllPlan);
+            SelectDestinationCommand = new RelayCommand(SelectDestination);
+
+            BackupPlan = plan ?? new BackupPlan();
+            _progressSubscription = _progressService.BackupProgress
+                .Where(p => p?.BackupId == _backupPlan!.Id)
+                .Subscribe(p => Progress = p);
         }
 
         public bool IsSaveEnabled => DestinationDirectory is not null;
@@ -68,9 +78,30 @@ namespace Archiver.Planning
 
         public IAsyncCommand RefreshCommand { get; set; }
 
+        public IAsyncCommand RestoreCommand { get; set; }
+
+        public IAsyncCommand RestoreAllCommand { get; set; }
+
+        public ICommand SelectDestinationCommand { get; set; }
+
+        public string? RestoreDestination 
+        {
+            get
+            {
+                return _restoreDestination;
+            }
+            set
+            {
+                _restoreDestination = value;
+                OnPropertyChanged();
+            }
+        }
+
         public ObservableCollection<FileSystemEntryViewModel> Drives { get; set; } = null!;
 
-        public ObservableCollection<RemoteFolderViewModel> RemoteFolders { get; set; } = null!;
+        public ObservableCollection<RemoteFolderViewModel> RemoteFolders { get; set; }
+
+        public ObservableCollection<ArchivedItemViewModel> ArchivedItems { get; set; }
 
         public BackupProgress? Progress
         {
@@ -292,16 +323,7 @@ namespace Archiver.Planning
                 OnPropertyChanged(nameof(IsSaturdayChecked));
                 OnPropertyChanged(nameof(IsSundayChecked));
 
-                ResetFolderListing();
-
-                foreach (var item in _backupPlan.FileSystemItems)
-                {
-                    foreach (var drive in Drives)
-                    {
-                        drive.RestoreSelected(item);
-                    }
-                }
-                OnPropertyChanged(nameof(Drives));
+                LoadOverview();
             }
         }
 
@@ -317,11 +339,41 @@ namespace Archiver.Planning
 
         private void LoadOverview()
         {
-            // Get the logical drives
-            var drives = DriveInfo.GetDrives().Where(d => d.IsReady);
+            if(Drives is null)
+            {
+                // Get the logical drives
+                var drives = DriveInfo.GetDrives().Where(d => d.IsReady);
 
-            Drives = new ObservableCollection<FileSystemEntryViewModel>(
-                drives.Select(d => new FileSystemEntryViewModel(new DriveInfoWrapper(d), false)));
+                Drives = new ObservableCollection<FileSystemEntryViewModel>(
+                    drives.Select(d => new FileSystemEntryViewModel(new DriveInfoWrapper(d), false)));
+            } 
+            else
+            {
+                ResetFolderListing();
+
+                foreach (var item in _backupPlan.FileSystemItems)
+                {
+                    foreach (var drive in Drives)
+                    {
+                        drive.RestoreSelected(item);
+                    }
+                }
+            }
+
+            OnPropertyChanged(nameof(Drives));
+
+            if (BackupPlan.DestinationFolder is not null)
+            {
+                var service = _backupServiceFactory.CreateService(BackupPlan);
+                service.GetArchivedFiles(new CancellationTokenSource().Token).ContinueWith(f =>
+                {
+                    foreach(var entry in f.Result.Select(e => new ArchivedItemViewModel(e)))
+                    {
+                        _dispatcher.Invoke(() => ArchivedItems.Add(entry));
+                    }
+                    OnPropertyChanged(nameof(ArchivedItems));
+                });
+            }
         }
 
         private async Task RefreshRemoteFolders()
@@ -330,10 +382,10 @@ namespace Archiver.Planning
             {
                 using var client = _ftpFactory.CreateFtpClient(BackupPlan.Connection);
 
-                await client.ConnectAsync();
-                foreach (var item in await client.GetListingAsync())
+                await client.Connect();
+                foreach (var item in await client.GetListing())
                 {
-                    if (item.Type == FtpFileSystemObjectType.Directory && RemoteFolders.All(r => r.FullName != item.FullName))
+                    if (item.Type == FtpObjectType.Directory && RemoteFolders.All(r => r.FullName != item.FullName))
                     {
                         RemoteFolders.Add(new RemoteFolderViewModel(item, _ftpFactory, this));
                     }
@@ -351,8 +403,8 @@ namespace Archiver.Planning
             try
             {
                 using var client = _ftpFactory.CreateFtpClient(BackupPlan.Connection);
-                client.ConnectTimeout = 5;
-                await client.ConnectAsync();
+                client.Config.ConnectTimeout = 5;
+                await client.Connect();
                 if (client.IsConnected)
                 {
                     System.Windows.MessageBox.Show("Successfully connected");
@@ -362,7 +414,8 @@ namespace Archiver.Planning
                     System.Windows.MessageBox.Show("Connection failed");
                 }
             }
-            catch (Exception e) when (e is InvalidOperationException || e is FtpAuthenticationException)
+            //TODO  || e is FtpAuthenticationException
+            catch (Exception e) when (e is InvalidOperationException)
             {
                 System.Windows.MessageBox.Show("Enter correct connection information");
             }
@@ -403,6 +456,40 @@ namespace Archiver.Planning
             _backupPlan.Id = _originalBackupPlan.Id;
             OnSavePlan?.Invoke(this, _backupPlan);
             OnPropertyChanged(nameof(NextExecution));
+        }
+
+        private async Task RestorePlan()
+        {
+            DestinationGuard();
+
+            var service = _backupServiceFactory.CreateService(BackupPlan);
+            await service.RestoreFilesAsync(RestoreDestination!, new List<string> { "archive.pst" }, new CancellationTokenSource().Token);
+        }
+
+        private async Task RestoreAllPlan()
+        {
+            DestinationGuard();
+
+            var service = _backupServiceFactory.CreateService(BackupPlan);
+            await service.RestoreAsync(RestoreDestination!, new CancellationTokenSource().Token);
+        }
+
+        private void DestinationGuard()
+        {
+            if(RestoreDestination == null)
+            {
+                MessageBox.Show("Please select a destination folder");
+            }
+        }
+
+        private void SelectDestination()
+        {
+            var dialog = new FolderBrowserDialog();
+            var result = dialog.ShowDialog();
+            if(result == DialogResult.OK)
+            {
+                RestoreDestination = dialog.SelectedPath;
+            }
         }
 
         private void ChangeScheduleType(Type type)

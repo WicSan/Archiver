@@ -2,7 +2,7 @@
 {
     public enum BackupType
     {
-        Differential,
-        Full
+        Full,
+        Differential
     }
 }

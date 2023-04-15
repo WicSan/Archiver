@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace Archiver.Util
 {
-    public static class FtpClientExtensions
+    public static class AsyncFtpClientExtensions
     {
-        public static async Task ConnectAsync(this IFtpClient client, int retryAttempts = 1, CancellationToken token = default)
+        public static async Task Connect(this IAsyncFtpClient client, int retryAttempts = 1, CancellationToken token = default)
         {
             await Observable
-                .FromAsync(() => client.ConnectAsync(token))
+                .FromAsync(() => client.Connect(token))
                 .RetryWhen(o => Observable
                    .Range(0, retryAttempts)
                    .Zip(o, (attempt, e) => (Attempt: attempt, Exception: e))

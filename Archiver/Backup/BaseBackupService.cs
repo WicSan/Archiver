@@ -18,30 +18,60 @@ namespace Archiver.Backup
     {
         private readonly BackupPlan _plan;
         private IProgressService _service;
-        private IFtpClientFactory _ftpClientFactory;
+        protected IAsyncFtpClient _ftpClient;
         private ILogger<BaseBackupService> _logger;
 
         public BaseBackupService(BackupPlan plan, IProgressService service, IFtpClientFactory ftpClientFactory, ILogger<BaseBackupService> logger)
         {
             _plan = plan;
             _service = service;
-            _ftpClientFactory = ftpClientFactory;
+            _ftpClient = ftpClientFactory.CreateFtpClient(_plan.Connection);
             _logger = logger;
         }
 
-        public async Task<bool> ExecuteAsync(CancellationToken cancellationToken)
+        protected BackupPlan Plan => _plan;
+
+        public async Task RestoreAsync(string destination, CancellationToken cancellationToken)
+        {
+            await _ftpClient.Connect(3, cancellationToken);
+
+            await _ftpClient.DownloadDirectory(destination, Path.Combine(_plan.DestinationFolder, _plan.Name));
+        }
+
+        public async Task RestoreFilesAsync(string destination, IEnumerable<string> files, CancellationToken cancellationToken)
+        {
+            var cfiles = files.ToList();
+            
+            await _ftpClient.Connect(3, cancellationToken);
+            var archiveFiles = (await GetArchiveFiles(cancellationToken)).OrderBy(a => a.Name);
+
+            foreach(var file in archiveFiles)
+            {
+                using(var stream = new SeekableFtpFileStream(_ftpClient, file.FullName))
+                using(var archive = new ZipArchive(stream))
+                {
+                    var archiveEntries = archive.Entries.Where(e => files.Any(f => f.Equals(e.Name, StringComparison.OrdinalIgnoreCase)));
+                    foreach(var archiveEntry in archiveEntries)
+                    {
+                        archiveEntry.ExtractToFile(Path.Combine(destination, archiveEntry.Name));
+                        cfiles.Remove(archiveEntry.Name);
+                    }
+                }
+            }
+        }
+
+        protected abstract Task<IEnumerable<FtpListItem>> GetArchiveFiles(CancellationToken cancellationToken);
+
+        public async Task<bool> ExecuteBackupAsync(CancellationToken cancellationToken)
         {
             var isSuccessfull = false;
             try
             {
-                using var client = _ftpClientFactory.CreateFtpClient(_plan.Connection);
-
                 _logger.LogInformation("Plan {Name} started at {StartDateTime} with file name {FullName}", _plan.Name, DateTime.Now, _plan.FullName);
+                await _ftpClient.Connect(3, cancellationToken);
 
-                await client.ConnectAsync(3, cancellationToken);
-
-                var archiveEntries = (await GetBackedUpFiles(client)).ToList();
-                isSuccessfull = await BackupFiles(client, _plan, archiveEntries, cancellationToken);
+                var archiveEntries = (await GetArchivedFiles(cancellationToken)).ToList();
+                isSuccessfull = await BackupFiles(_plan, archiveEntries, cancellationToken);
 
                 _service.Complete(_plan.Id);
             }
@@ -51,6 +81,7 @@ namespace Archiver.Backup
             }
             finally
             {
+                await _ftpClient.Disconnect();
                 _plan.ResetProgress();
             }
 
@@ -59,24 +90,19 @@ namespace Archiver.Backup
 
         protected abstract IEnumerable<FileInfo> GetFilesToBackup(IEnumerable<ZipArchiveEntry> archivedFiles, IEnumerable<FileInfo> newFiles);
 
-        private async Task<IEnumerable<ZipArchiveEntry>> GetBackedUpFiles(IFtpClient client)
+        public async Task<IEnumerable<ZipArchiveEntry>> GetArchivedFiles(CancellationToken cancellationToken)
         {
-            var zipFiles = await client.GetListingAsync($"/{_plan.DestinationFolder}/{_plan.Name}");
-            if (!zipFiles.Any(z => z.Name.Contains("full")))
+            if (!_ftpClient.IsConnected)
             {
-                if (zipFiles.Any())
-                {
-                    _logger.LogError("Missing full backup file");
-                }
-
-                return Enumerable.Empty<ZipArchiveEntry>();
+                await _ftpClient.Connect();
             }
 
-            return zipFiles.SelectMany(z =>
+            var archiveFiles = await GetArchiveFiles(cancellationToken);
+            var archivedFiles = archiveFiles.SelectMany(z =>
             {
                 try
                 {
-                    using (var stream = new SeekableFtpFileStream(client, z.FullName))
+                    using (var stream = new SeekableFtpFileStream(_ftpClient, z.FullName))
                     using (var zipArchive = new ZipArchive(stream, ZipArchiveMode.Read))
                     {
                         return zipArchive.Entries;
@@ -86,10 +112,14 @@ namespace Archiver.Backup
                 {
                     return Enumerable.Empty<ZipArchiveEntry>();
                 }
-            });
+            }).ToList();
+
+            await _ftpClient.Disconnect();
+
+            return archivedFiles;
         }
 
-        private async Task<bool> BackupFiles(IFtpClient client, BackupPlan plan, List<ZipArchiveEntry> archiveEntries, CancellationToken cancellationToken)
+        private async Task<bool> BackupFiles(BackupPlan plan, List<ZipArchiveEntry> archiveEntries, CancellationToken cancellationToken)
         {
             var filesToBackup = GetFilesToBackup(archiveEntries, GetLocalFiles(plan)).ToList();
             if (!filesToBackup.Any())
@@ -98,7 +128,7 @@ namespace Archiver.Backup
             }
 
             var folder = $"/{Path.Combine(plan.DestinationFolder, plan.Name)}";
-            await client.CreateDirectoryAsync(folder);
+            await _ftpClient.CreateDirectory(folder);
 
             var currentTime = SystemClock.Instance.GetCurrentInstant().ToString("yyyy-MM-dd-HH-mm-ss", null);
             var prefix = "full";
@@ -107,7 +137,7 @@ namespace Archiver.Backup
                 prefix = "diff";
             }
             var fullName = Path.Combine(folder, $"{prefix}_{currentTime}.zip");
-            using (var uploadStream = await client.OpenWriteAsync(fullName, FtpDataType.Binary, false, cancellationToken))
+            using (var uploadStream = await _ftpClient.OpenWrite(fullName, FtpDataType.Binary, false, cancellationToken))
             using (var limitedStream = new RateLimitedStream(uploadStream, 80))
             using (var archive = new ZipArchive(limitedStream, ZipArchiveMode.Create, false))
             {
@@ -128,7 +158,7 @@ namespace Archiver.Backup
                 }
             }
 
-            return IsBackupSuccessfull(client);
+            return await IsBackupSuccessfull();
         }
 
         private IEnumerable<FileInfo> GetLocalFiles(BackupPlan plan)
@@ -155,9 +185,9 @@ namespace Archiver.Backup
             }
         }
 
-        private bool IsBackupSuccessfull(IFtpClient client)
+        private async Task<bool> IsBackupSuccessfull()
         {
-            var replay = client.GetReply();
+            var replay = await _ftpClient.GetReply();
             if (replay.Success)
             {
                 _logger.LogInformation("Backup plan {Name} execution successfull.", _plan.Name);

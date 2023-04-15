@@ -19,7 +19,7 @@ namespace Archiver.Tests
             var fakeClock = new FakeClock(Instant.FromDateTimeOffset(new DateTimeOffset(2021, 11, 1, 7, 59, 59, TimeSpan.FromHours(1))));
             var ftpFactoryMock = new Mock<IFtpClientFactory>();
             var factoryMock = new Mock<IBackupPlanOverviewViewModelFactory>();
-            var viewModel = new BackupPlanOverviewViewModel(ftpFactoryMock.Object, new ProgressService(), fakeClock, new BackupPlan());
+            var viewModel = new BackupPlanOverviewViewModel(ftpFactoryMock.Object, new BackupServiceFactory(), new ProgressService(), fakeClock, new BackupPlan());
             var repositoryMock = new Mock<IRepository<BackupPlan>>();
 
             factoryMock.Setup(f => f.CreateModel(It.IsAny<BackupPlan>())).Returns(viewModel);

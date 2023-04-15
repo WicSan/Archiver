@@ -37,6 +37,7 @@ namespace Archiver.Planning.Model
             Name = plan.Name;
             DestinationFolder = plan.DestinationFolder;
             FileSystemItems = plan.FileSystemItems;
+            BackupType = plan.BackupType;
             Schedule = (BackupSchedule)plan.Schedule.Clone();
             Connection = (FtpConnectionDetails)plan.Connection.Clone();
         }
@@ -69,7 +70,7 @@ namespace Archiver.Planning.Model
             }
         }
 
-        public BackupType BackupType => BackupType.Differential;
+        public BackupType BackupType { get; set; }
 
         public override bool Equals(object? obj) => this.Equals(obj as BackupPlan);
 
@@ -93,7 +94,5 @@ namespace Archiver.Planning.Model
         {
             return new BackupPlan(this);
         }
-
-
     }
 }

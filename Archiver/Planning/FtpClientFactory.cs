@@ -1,5 +1,8 @@
-﻿using Archiver.Planning.Model;
+﻿using Archiver.Backup;
+using Archiver.Planning.Model;
 using FluentFTP;
+using FluentFTP.Client.BaseClient;
+using FluentFTP.Logging;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Net;
@@ -10,17 +13,17 @@ namespace Archiver.Planning
     public class FtpClientFactory : IFtpClientFactory
     {
         private readonly X509Certificate _cert;
-        private readonly bool _enabledLogging;
+        private readonly bool _enabledCommandLogging;
         private readonly ILogger<FtpClient> _logger;
 
-        public FtpClientFactory(bool enabledLogging, ILogger<FtpClient> logger)
+        public FtpClientFactory(bool enabledCommandLogging, ILogger<FtpClient> logger)
         {
             _cert = X509Certificate.CreateFromCertFile("Resources/ftp.crt");
-            _enabledLogging = enabledLogging;
+            _enabledCommandLogging = enabledCommandLogging;
             _logger = logger;
         }
 
-        public IFtpClient CreateFtpClient(FtpConnectionDetails connection)
+        public IAsyncFtpClient CreateFtpClient(FtpConnectionDetails connection)
         {
             if (connection.Host is null || connection.Username is null || connection.Password is null)
             {
@@ -28,13 +31,20 @@ namespace Archiver.Planning
             }
 
             var credentials = new NetworkCredential(connection.Username, connection.Password);
-            var client = new FtpClient(connection.Host, credentials);
-            client.EncryptionMode = FtpEncryptionMode.Explicit;
-            client.Port = 21;
-            client.DataConnectionType = FtpDataConnectionType.PASV;
-            client.ValidateAnyCertificate = true;
-            client.RetryAttempts = 3;
-            client.ValidateCertificate += (FtpClient control, FtpSslValidationEventArgs e) =>
+            var config = new FtpConfig
+            {
+                EncryptionMode = FtpEncryptionMode.Explicit,
+                DataConnectionType = FtpDataConnectionType.AutoPassive,
+                StaleDataCheck = false,
+                ValidateAnyCertificate = true,
+                RetryAttempts = 3,
+                LogToConsole = _enabledCommandLogging,
+                LogPassword = false
+            };
+
+            var logAdapter = new FtpLogAdapter(_logger);
+            var client = new AsyncFtpClient(connection.Host, credentials, 21, config, logAdapter);
+            client.ValidateCertificate += (BaseFtpClient control, FtpSslValidationEventArgs e) =>
             {
                 if (e.Certificate.Equals(_cert))
                 {
@@ -45,29 +55,6 @@ namespace Archiver.Planning
                     e.Accept = false;
                 }
             };
-
-            if (_enabledLogging)
-            {
-                client.OnLogEvent += (tracelevel, message) =>
-                {
-                    switch (tracelevel)
-                    {
-                        case FtpTraceLevel.Error:
-                            _logger.LogError(message);
-                            break;
-                        case FtpTraceLevel.Verbose:
-                            _logger.LogDebug(message);
-                            break;
-                        case FtpTraceLevel.Warn:
-                            _logger.LogWarning(message);
-                            break;
-                        case FtpTraceLevel.Info:
-                        default:
-                            _logger.LogInformation(message);
-                            break;
-                    }
-                };
-            }
 
             return client;
         }
