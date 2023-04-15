@@ -125,21 +125,58 @@ namespace Archiver.Planning
             }
         }
 
-        public bool IsDailySelected
+        public int SelectedSchedulePeriod
         {
             get
             {
-                return _backupPlan.Schedule is DailyBackupSchedule;
+                switch (_backupPlan.Schedule)
+                {
+                    case DailyBackupSchedule:
+                        return 0;
+                    case WeeklyBackupSchedule:
+                        return 1;
+                    default:
+                        return -1;
+                }
+            }
+            set
+            {
+                switch (value)
+                {
+                    case 0:
+                        BackupPlan.Schedule = new DailyBackupSchedule();
+                        break;
+                    case 1:
+                        BackupPlan.Schedule = new DailyBackupSchedule();
+                        break;
+                }
+
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(IsWeeklySelected));
+                OnPropertyChanged(nameof(IsMondayChecked));
+                OnPropertyChanged(nameof(IsTuesdayChecked));
+                OnPropertyChanged(nameof(IsWednesdayChecked));
+                OnPropertyChanged(nameof(IsThursdayChecked));
+                OnPropertyChanged(nameof(IsFridayChecked));
+                OnPropertyChanged(nameof(IsSaturdayChecked));
+                OnPropertyChanged(nameof(IsSundayChecked));
             }
         }
 
-        public bool IsWeeklySelected
+        public int SelectedScheduleType
         {
             get
             {
-                return _backupPlan.Schedule is WeeklyBackupSchedule;
+                return (int)_backupPlan.BackupType;
+            }
+            set
+            {
+                _backupPlan.BackupType = (BackupType)value;
+                OnPropertyChanged();
             }
         }
+
+        public bool IsWeeklySelected => BackupPlan.Schedule is WeeklyBackupSchedule;
 
         public bool IsMondayChecked
         {
@@ -300,6 +337,16 @@ namespace Archiver.Planning
 
         public IEnumerable<FileSystemEntryViewModel?> SelectedFolderChildren => SelectedFolder?.Children.ToList() ?? new List<FileSystemEntryViewModel?>();
 
+        public void SelectTreeViewItem(FileSystemEntryViewModel entry)
+        {
+            if (entry.Children.Count(i => i is not null) == 0)
+            {
+                entry.LoadChildren();
+            }
+
+            SelectedFolder = entry;
+        }
+
         public BackupPlan BackupPlan
         {
             get { return _backupPlan; }
@@ -311,10 +358,9 @@ namespace Archiver.Planning
                 _backupPlan.Schedule.LastExecution = value.Schedule.LastExecution;
 
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(IsWeeklySelected));
                 OnPropertyChanged(nameof(DestinationDirectory));
                 OnPropertyChanged(nameof(IsSaveEnabled));
-                OnPropertyChanged(nameof(IsDailySelected));
-                OnPropertyChanged(nameof(IsWeeklySelected));
                 OnPropertyChanged(nameof(IsMondayChecked));
                 OnPropertyChanged(nameof(IsTuesdayChecked));
                 OnPropertyChanged(nameof(IsWednesdayChecked));
@@ -327,16 +373,6 @@ namespace Archiver.Planning
             }
         }
 
-        public void SelectTreeViewItem(FileSystemEntryViewModel entry)
-        {
-            if (entry.Children.Count(i => i is not null) == 0)
-            {
-                entry.LoadChildren();
-            }
-
-            SelectedFolder = entry;
-        }
-
         private void LoadOverview()
         {
             if(Drives is null)
@@ -346,17 +382,17 @@ namespace Archiver.Planning
 
                 Drives = new ObservableCollection<FileSystemEntryViewModel>(
                     drives.Select(d => new FileSystemEntryViewModel(new DriveInfoWrapper(d), false)));
-            } 
+            }
             else
             {
                 ResetFolderListing();
+            }
 
-                foreach (var item in _backupPlan.FileSystemItems)
+            foreach (var item in _backupPlan.FileSystemItems)
+            {
+                foreach (var drive in Drives)
                 {
-                    foreach (var drive in Drives)
-                    {
-                        drive.RestoreSelected(item);
-                    }
+                    drive.RestoreSelected(item);
                 }
             }
 
@@ -463,7 +499,7 @@ namespace Archiver.Planning
             DestinationGuard();
 
             var service = _backupServiceFactory.CreateService(BackupPlan);
-            await service.RestoreFilesAsync(RestoreDestination!, new List<string> { "archive.pst" }, new CancellationTokenSource().Token);
+            await service.RestoreFilesAsync(RestoreDestination!, ArchivedItems.Where(i => i.IsChecked).Select(i => i.Name), new CancellationTokenSource().Token);
         }
 
         private async Task RestoreAllPlan()
@@ -494,16 +530,7 @@ namespace Archiver.Planning
 
         private void ChangeScheduleType(Type type)
         {
-            BackupPlan.Schedule = (BackupSchedule)Activator.CreateInstance(type, BackupPlan.Schedule)!;
-            OnPropertyChanged(nameof(IsDailySelected));
-            OnPropertyChanged(nameof(IsWeeklySelected));
-            OnPropertyChanged(nameof(IsMondayChecked));
-            OnPropertyChanged(nameof(IsTuesdayChecked));
-            OnPropertyChanged(nameof(IsWednesdayChecked));
-            OnPropertyChanged(nameof(IsThursdayChecked));
-            OnPropertyChanged(nameof(IsFridayChecked));
-            OnPropertyChanged(nameof(IsSaturdayChecked));
-            OnPropertyChanged(nameof(IsSundayChecked));
+
         }
 
         private IEnumerable<FileSystemEntryViewModel> GetSelectedFileSystemEntries(IEnumerable<FileSystemEntryViewModel?> entries)

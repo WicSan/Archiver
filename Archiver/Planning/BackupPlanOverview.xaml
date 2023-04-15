@@ -107,7 +107,7 @@
                 </TabItem>
                 <TabItem Header="Schedule" FontSize="14" Background="White">
                     <Grid Background="White">
-                        <GroupBox Header="Execution" Margin="170,10,0,0" BorderBrush="#FFA1A6A9" Padding="5,5,0,0" HorizontalAlignment="Left" Width="329" Height="261" VerticalAlignment="Top">
+                        <GroupBox Header="Execution" Margin="244,8,0,0" BorderBrush="#FFA1A6A9" Padding="5,5,0,0" HorizontalAlignment="Left" Width="325" Height="224" VerticalAlignment="Top">
                             <Grid>
                                 <StackPanel Margin="0,0,197,0" IsEnabled="{Binding IsWeeklySelected, Mode=OneWay}">
                                     <StackPanel.Resources>
@@ -123,23 +123,20 @@
                                     <CheckBox IsChecked="{Binding IsSaturdayChecked}" Content="Saturday"/>
                                     <CheckBox IsChecked="{Binding IsSundayChecked}" Content="Sunday"/>
                                 </StackPanel>
-                                <Label Content="At" HorizontalAlignment="Left" Margin="150,0,0,0" Width="37" VerticalContentAlignment="Center" Height="34" VerticalAlignment="Top"/>
+                                <Label Content="Start at" HorizontalAlignment="Left" Margin="128,0,0,0" Width="59" VerticalContentAlignment="Center" Height="34" VerticalAlignment="Top"/>
                                 <uc:TimeBox Margin="203,0,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Time="{Binding BackupPlan.Schedule.ExecutionTime, Mode=TwoWay}" />
                             </Grid>
                         </GroupBox>
-
-                        <GroupBox Header="Period" Margin="10,10,648,0" BorderBrush="#FFA1A6A9" Padding="5,5,0,0" Height="261" VerticalAlignment="Top">
-                            <StackPanel>
-                                <StackPanel.Resources>
-                                    <Style TargetType="{x:Type RadioButton}">
-                                        <Setter Property="Margin" Value="0,10,0,0"/>
-                                    </Style>
-                                </StackPanel.Resources>
-                                <RadioButton x:Name="cbDaily" IsChecked="{Binding IsDailySelected, Mode=OneWay}" Command="{Binding ChangeTypeCommand}" Content="Daily" CommandParameter="{x:Type m:DailyBackupSchedule}" HorizontalAlignment="Left" VerticalAlignment="Top" GroupName="Type" />
-                                <RadioButton x:Name="cbWeekly" IsChecked="{Binding IsWeeklySelected, Mode=OneWay}" Content="Weekly" Command="{Binding ChangeTypeCommand}" CommandParameter="{x:Type m:WeeklyBackupSchedule}" HorizontalAlignment="Left" VerticalAlignment="Top" GroupName="Type"/>
-                                <RadioButton x:Name="cbMonthly" Command="{Binding ChangeTypeCommand}" Content="Monthly" CommandParameter="{x:Type m:DailyBackupSchedule}" HorizontalAlignment="Left"  VerticalAlignment="Top" GroupName="Type" IsEnabled="False"/>
-                            </StackPanel>
-                        </GroupBox>
+                        <ComboBox HorizontalAlignment="Left" Margin="94,43,0,0" VerticalAlignment="Top" Width="120" SelectedIndex="{Binding SelectedScheduleType, Mode=TwoWay}">
+                            <ComboBoxItem Content="Full"/>
+                            <ComboBoxItem Content="Differential" />
+                        </ComboBox>
+                        <Label FontSize="14" Content="Type" HorizontalAlignment="Left" Margin="19,41,0,0" VerticalAlignment="Top" Width="75"/>
+                        <Label FontSize="14" Content="Period" HorizontalAlignment="Left" Margin="19,75,0,0" VerticalAlignment="Top" Width="75"/>
+                        <ComboBox HorizontalAlignment="Left" Margin="94,77,0,0" VerticalAlignment="Top" Width="120" SelectedIndex="{Binding SelectedSchedulePeriod, Mode=TwoWay}">
+                            <ComboBoxItem Content="Daily"/>
+                            <ComboBoxItem Content="Weekly"/>
+                        </ComboBox>
                     </Grid>
                 </TabItem>
                 <TabItem HorizontalAlignment="Center" Height="37" Header="Restore" VerticalAlignment="Center" Width="110" FontSize="14">
