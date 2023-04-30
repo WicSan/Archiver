@@ -16,6 +16,7 @@ using Archiver.Backup;
 using Archiver.Backup.Model;
 using System.Threading;
 using System.Windows.Threading;
+using FluentFTP.Exceptions;
 
 namespace Archiver.Planning
 {
@@ -53,7 +54,6 @@ namespace Archiver.Planning
             SaveCommand = new RelayCommand(SavePlan);
             CancelCommand = new RelayCommand(Cancel);
             CheckConnectionCommand = new AsyncCommand(CheckConnection);
-            ChangeTypeCommand = new RelayCommand<Type>(ChangeScheduleType);
             RestoreCommand = new AsyncCommand(RestorePlan);
             RestoreAllCommand = new AsyncCommand(RestoreAllPlan);
             SelectDestinationCommand = new RelayCommand(SelectDestination);
@@ -71,8 +71,6 @@ namespace Archiver.Planning
         public ICommand SaveCommand { get; set; }
 
         public ICommand CancelCommand { get; set; }
-
-        public ICommand ChangeTypeCommand { get; set; }
 
         public IAsyncCommand CheckConnectionCommand { get; set; }
 
@@ -450,8 +448,7 @@ namespace Archiver.Planning
                     System.Windows.MessageBox.Show("Connection failed");
                 }
             }
-            //TODO  || e is FtpAuthenticationException
-            catch (Exception e) when (e is InvalidOperationException)
+            catch (Exception e) when (e is InvalidOperationException || e is FtpAuthenticationException)
             {
                 System.Windows.MessageBox.Show("Enter correct connection information");
             }
@@ -526,11 +523,6 @@ namespace Archiver.Planning
             {
                 RestoreDestination = dialog.SelectedPath;
             }
-        }
-
-        private void ChangeScheduleType(Type type)
-        {
-
         }
 
         private IEnumerable<FileSystemEntryViewModel> GetSelectedFileSystemEntries(IEnumerable<FileSystemEntryViewModel?> entries)

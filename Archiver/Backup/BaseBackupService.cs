@@ -71,8 +71,12 @@ namespace Archiver.Backup
                 await _ftpClient.Connect(3, cancellationToken);
 
                 var archiveEntries = (await GetArchivedFiles(cancellationToken)).ToList();
-                isSuccessfull = await BackupFiles(_plan, archiveEntries, cancellationToken);
-
+                var filesToBackup = GetFilesToBackup(archiveEntries, GetLocalFiles()).ToList();
+                if (filesToBackup.Any())
+                {
+                    isSuccessfull = await BackupFiles(filesToBackup, cancellationToken);
+                }
+                
                 _service.Complete(_plan.Id);
             }
             catch (Exception e)
@@ -119,20 +123,14 @@ namespace Archiver.Backup
             return archivedFiles;
         }
 
-        private async Task<bool> BackupFiles(BackupPlan plan, List<ZipArchiveEntry> archiveEntries, CancellationToken cancellationToken)
+        private async Task<bool> BackupFiles(List<FileInfo> filesToBackup, CancellationToken cancellationToken)
         {
-            var filesToBackup = GetFilesToBackup(archiveEntries, GetLocalFiles(plan)).ToList();
-            if (!filesToBackup.Any())
-            {
-                return true;
-            }
-
-            var folder = $"/{Path.Combine(plan.DestinationFolder, plan.Name)}";
+            var folder = $"/{Path.Combine(_plan.DestinationFolder, _plan.Name)}";
             await _ftpClient.CreateDirectory(folder);
 
             var currentTime = SystemClock.Instance.GetCurrentInstant().ToString("yyyy-MM-dd-HH-mm-ss", null);
             var prefix = "full";
-            if (archiveEntries.Any())
+            if (_plan.InitialBackupExecuted)
             {
                 prefix = "diff";
             }
@@ -154,14 +152,14 @@ namespace Archiver.Backup
                     archive.AddEntry(file);
 
                     progress += 1.0 / totalFiles;
-                    _service.ReportProgress(plan.Id, progress);
+                    _service.ReportProgress(_plan.Id, progress);
                 }
             }
 
             return await IsBackupSuccessfull();
         }
 
-        private IEnumerable<FileInfo> GetLocalFiles(BackupPlan plan)
+        private IEnumerable<FileInfo> GetLocalFiles()
         {
             var options = new EnumerationOptions
             {
@@ -169,10 +167,10 @@ namespace Archiver.Backup
                 RecurseSubdirectories = true
             };
 
-            var singleFiles = plan.FileSystemItems
+            var singleFiles = _plan.FileSystemItems
                 .Where(i => i is FileInfo)
                 .Cast<FileInfo>();
-            var files = plan.FileSystemItems
+            var files = _plan.FileSystemItems
                 .Where(i => i is DirectoryInfo)
                 .Cast<DirectoryInfo>()
                 .Select(d => Directory.GetFiles(d.FullName, "*", options).Select(f => new FileInfo(f)))

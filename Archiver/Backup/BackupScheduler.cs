@@ -47,7 +47,7 @@ namespace Archiver.Backup
                     .SelectMany(async p =>
                     {
                         var service = _factory.CreateService(p);
-                        var isSuccessfull = await service.ExecuteAsync(_externalToken);
+                        var isSuccessfull = await service.ExecuteBackupAsync(_externalToken);
 
                         if (isSuccessfull)
                         {

@@ -50,7 +50,7 @@
                                         </HierarchicalDataTemplate>
                                     </TreeView.ItemTemplate>
                                 </TreeView>
-                                <Button Content="R" Command="{Binding RefreshCommand}" HorizontalAlignment="Left" Width="43" Height="34" VerticalAlignment="Bottom" Margin="177,0,0,62"/>
+                                <Button Content="R" Command="{Binding RefreshCommand}" HorizontalAlignment="Left" Width="43" Height="34" VerticalAlignment="Bottom" Margin="177,0,0,62" AutomationProperties.HelpText="Reload destination folders" ToolTip="Reload destination folders"/>
                                 <Label Content="Selected:" HorizontalAlignment="Left" Margin="10,207,0,0" VerticalAlignment="Top" VerticalContentAlignment="Top" Padding="0,0,0,0"/>
                                 <TextBlock Text="{Binding DestinationDirectory, Mode=OneWay}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="77,207,0,0" Height="46" Width="228" TextWrapping="Wrap" Foreground="Gray"/>
                             </Grid>
@@ -59,12 +59,6 @@
                 </TabItem>
                 <TabItem Header="Files" FontSize="14" VerticalAlignment="Stretch" Background="White">
                     <Grid Margin="0,0,0,32" VerticalAlignment="Stretch">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition />
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="1*"/>
-                        </Grid.RowDefinitions>
                         <TreeView x:Name="FolderTreeView" 
                                   Grid.Row="0" Grid.Column="0"
                                   VerticalAlignment="Stretch"

@@ -53,22 +53,7 @@ namespace Archiver.Planning.Model
             }
         }
 
-        public string? PreviousFullName
-        {
-            get
-            {
-                if(Schedule.LastExecution is null)
-                {
-                    return null;
-                }
-
-                var timestamp = Schedule.LastExecution?.ToString("yyyy-MM-dd-HH-mm-ss", null);
-                var backupFileName = $"{Name}_{timestamp}";
-                var backupFullName = $"{DestinationFolder}/{backupFileName}.zip";
-
-                return backupFullName;
-            }
-        }
+        public bool InitialBackupExecuted => Schedule.LastExecution is not null;
 
         public BackupType BackupType { get; set; }
 

@@ -41,7 +41,13 @@ namespace Archiver.Backup
                 _stream.Dispose();
                 _stream = null;
 
-                var re = Task.Run(() => _ftpClient.GetReply()).GetAwaiter().GetResult();
+                try
+                {
+                    var re = Task.Run(() => _ftpClient.GetReply()).GetAwaiter().GetResult();
+                }
+                catch (TimeoutException)
+                {
+                }
             }
         }
 
