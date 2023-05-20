@@ -16,6 +16,8 @@ using Archiver.Planning.Model;
 using Archiver.Planning.Database;
 using System.Text.Json.Serialization;
 using Archiver.Backup;
+using System.Threading;
+using System.Diagnostics;
 
 namespace Archiver
 {
@@ -25,32 +27,12 @@ namespace Archiver
     public partial class App : Application
     {
         private System.Windows.Forms.NotifyIcon _notifyIcon;
-        private IHost _host;
-        private Microsoft.Extensions.Logging.ILogger _logger;
+        private IHost? _host;
 
         public App()
         {
             _notifyIcon = new System.Windows.Forms.NotifyIcon();
             _notifyIcon.Click += NotifyIcon_Click;
-
-            _host = Host.CreateDefaultBuilder()
-                .ConfigureServices(services =>
-                {
-                    ConfigureServices(services);
-                })
-                .UseSerilog((context, services, loggerConfiguration) => loggerConfiguration
-                    .Enrich.FromLogContext()
-                    .WriteTo.File("logs/archiver.log"))
-                .Build();
-
-            _logger = _host.Services.GetRequiredService<ILogger<App>>();
-
-            var menu = new System.Windows.Forms.ContextMenuStrip();
-            var item = new System.Windows.Forms.ToolStripMenuItem("Quit");
-            item.Click += NotifyIconMenuQuit_Click;
-            menu.Items.Add(item);
-            _notifyIcon.ContextMenuStrip = menu;
-            _notifyIcon.Text = "No backup in progess";
         }
 
         private void ConfigureServices(IServiceCollection services)
@@ -89,16 +71,46 @@ namespace Archiver
         {
             base.OnStartup(e);
 
+            var basePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            if (Debugger.IsAttached)
+            {
+                basePath = Environment.CurrentDirectory;
+            }
+
+            Log.Logger = new LoggerConfiguration()
+                .Enrich.FromLogContext()
+                .MinimumLevel.Information()
+                .WriteTo.File(Path.Combine(basePath, "Archiver\\logs\\archiver.log"))
+                .CreateLogger();
+
+            _host = Host.CreateDefaultBuilder()
+                .UseSerilog()
+                .ConfigureServices(services =>
+                {
+                    ConfigureServices(services);
+                })
+                .Build();
+
+            var menu = new System.Windows.Forms.ContextMenuStrip();
+            var item = new System.Windows.Forms.ToolStripMenuItem("Quit");
+            item.Click += NotifyIconMenuQuit_Click;
+            menu.Items.Add(item);
+            _notifyIcon.ContextMenuStrip = menu;
+            _notifyIcon.Text = "No backup in progess";
+
             ConfigureTaskBarIcon();
 
-            _logger.LogInformation("Archiver started...");
+            Log.Logger.Information("Archiver started...");
 
             await _host.RunAsync();
         }
 
-        protected override void OnExit(ExitEventArgs e)
+        protected override async void OnExit(ExitEventArgs e)
         {
-            _logger.LogInformation("Archiver shutingdown...");
+            Log.Logger.Information("Archiver shutingdown...");
+
+            var tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(3));
+            await _host!.StopAsync(tokenSource.Token);
 
             base.OnExit(e);
         }
@@ -117,7 +129,7 @@ namespace Archiver
             var clickArgs = (System.Windows.Forms.MouseEventArgs)e;
             if (clickArgs.Button != System.Windows.Forms.MouseButtons.Right)
             {
-                var window = _host.Services.GetRequiredService<MainWindow>();
+                var window = _host!.Services.GetRequiredService<MainWindow>();
                 if(window.Visibility != Visibility.Visible)
                 {
                     window.Show();
