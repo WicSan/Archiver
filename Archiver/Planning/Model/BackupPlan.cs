@@ -75,6 +75,11 @@ namespace Archiver.Planning.Model
             Progress = -1;
         }
 
+        public void UpdateExecutionTime(LocalDateTime dateTime)
+        {
+            Schedule.LastExecution = dateTime;
+        }
+
         public object Clone()
         {
             return new BackupPlan(this);

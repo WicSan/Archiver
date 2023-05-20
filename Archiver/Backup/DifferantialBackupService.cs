@@ -1,5 +1,6 @@
 ﻿using Archiver.Planning;
 using Archiver.Planning.Model;
+using Archiver.Util;
 using FluentFTP;
 using Microsoft.Extensions.Logging;
 using NodaTime;
@@ -15,8 +16,14 @@ namespace Archiver.Backup
 {
     public class DifferantialBackupService : BaseBackupService
     {
-        public DifferantialBackupService(BackupPlan plan, IProgressService service, IFtpClientFactory ftpClientFactory, ILogger<BaseBackupService> logger) 
-            : base(plan, service, ftpClientFactory, logger)
+        public DifferantialBackupService(
+            BackupPlan plan,
+            IProgressService service,
+            IFtpClientFactory ftpClientFactory,
+            IRepository<BackupPlan> repository,
+            IClock clock,
+            ILogger<BaseBackupService> logger)
+            : base(plan, service, ftpClientFactory, repository, clock, logger)
         {
 
         }

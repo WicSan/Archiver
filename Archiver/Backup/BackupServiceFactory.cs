@@ -1,6 +1,8 @@
 ﻿using Archiver.Planning;
 using Archiver.Planning.Model;
+using Archiver.Util;
 using Microsoft.Extensions.Logging;
+using NodaTime;
 using System;
 
 namespace Archiver.Backup
@@ -9,16 +11,16 @@ namespace Archiver.Backup
     {
         private IProgressService _service;
         private IFtpClientFactory _ftpClientFactory;
+        private readonly IRepository<BackupPlan> _repository;
+        private readonly IClock _clock;
         private ILogger<BaseBackupService> _logger;
 
-        public BackupServiceFactory()
-        {
-        }
-
-        public BackupServiceFactory(IProgressService service, IFtpClientFactory ftpClientFactory, ILogger<BaseBackupService> logger)
+        public BackupServiceFactory(IProgressService service, IFtpClientFactory ftpClientFactory, IRepository<BackupPlan> repository, IClock clock, ILogger<BaseBackupService> logger)
         {
             _service = service;
             _ftpClientFactory = ftpClientFactory;
+            _repository = repository;
+            _clock = clock;
             _logger = logger;
         }
 
@@ -27,9 +29,9 @@ namespace Archiver.Backup
             switch (plan.BackupType)
             {
                 case BackupType.Differential:
-                    return new DifferantialBackupService(plan, _service, _ftpClientFactory, _logger);
+                    return new DifferantialBackupService(plan, _service, _ftpClientFactory, _repository, _clock, _logger);
                 case BackupType.Full:
-                    return new FullBackupService(plan, _service, _ftpClientFactory, _logger);
+                    return new FullBackupService(plan, _service, _ftpClientFactory, _repository, _clock, _logger);
                 default:
                     throw new NotSupportedException();
             }

@@ -1,7 +1,9 @@
 ﻿using Archiver.Planning;
 using Archiver.Planning.Model;
+using Archiver.Util;
 using FluentFTP;
 using Microsoft.Extensions.Logging;
+using NodaTime;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -13,8 +15,14 @@ namespace Archiver.Backup
 {
     public class FullBackupService : BaseBackupService
     {
-        public FullBackupService(BackupPlan plan, IProgressService service, IFtpClientFactory ftpClientFactory, ILogger<BaseBackupService> logger)
-            : base(plan, service, ftpClientFactory, logger)
+        public FullBackupService(
+            BackupPlan plan, 
+            IProgressService service,
+            IFtpClientFactory ftpClientFactory,
+            IRepository<BackupPlan> repository,
+            IClock clock,
+            ILogger<BaseBackupService> logger)
+            : base(plan, service, ftpClientFactory, repository, clock, logger)
         {
         }
 

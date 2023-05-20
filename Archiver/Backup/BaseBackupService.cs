@@ -18,13 +18,23 @@ namespace Archiver.Backup
     {
         private readonly BackupPlan _plan;
         private IProgressService _service;
+        private readonly IRepository<BackupPlan> _repository;
+        private readonly IClock _clock;
         protected IAsyncFtpClient _ftpClient;
         private ILogger<BaseBackupService> _logger;
 
-        public BaseBackupService(BackupPlan plan, IProgressService service, IFtpClientFactory ftpClientFactory, ILogger<BaseBackupService> logger)
+        public BaseBackupService(
+            BackupPlan plan,
+            IProgressService service,
+            IFtpClientFactory ftpClientFactory,
+            IRepository<BackupPlan> repository,
+            IClock clock,
+            ILogger<BaseBackupService> logger)
         {
             _plan = plan;
             _service = service;
+            _repository = repository;
+            _clock = clock;
             _ftpClient = ftpClientFactory.CreateFtpClient(_plan.Connection);
             _logger = logger;
         }
@@ -67,7 +77,7 @@ namespace Archiver.Backup
             var isSuccessfull = false;
             try
             {
-                _logger.LogInformation("Plan {Name} started at {StartDateTime} with file name {FullName}", _plan.Name, DateTime.Now, _plan.FullName);
+                _logger.LogInformation("Plan {Name} started at {StartDateTime} with file name {FullName}", _plan.Name, _clock.GetCurrentInstant(), _plan.FullName);
                 await _ftpClient.Connect(3, cancellationToken);
 
                 var archiveEntries = (await GetArchivedFiles(cancellationToken)).ToList();
@@ -85,6 +95,9 @@ namespace Archiver.Backup
             }
             finally
             {
+                _plan.UpdateExecutionTime(_clock.GetCurrentInstant().ToLocalDateTime());
+                await _repository.UpsertAsync(_plan);
+
                 await _ftpClient.Disconnect();
                 _plan.ResetProgress();
             }
